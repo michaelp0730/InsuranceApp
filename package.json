@@ -1,0 +1,26 @@
+{
+  "name": "insuranceapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc-watch --onsuccess \"node dist/server.js\"",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "Michael Pellegrini",
+  "license": "ISC",
+  "description": "A web application with a MySQL database, Node.js back-end, and a React front-end",
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.4",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "tsc-watch": "^6.2.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@types/node": "^22.8.6",
+    "express": "^4.21.1"
+  }
+}
