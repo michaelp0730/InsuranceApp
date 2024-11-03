@@ -19,6 +19,7 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
     - [Mac](#mac-1)
     - [Windows](#windows-1)
     - [Linux](#linux-1)
+  - [Environment Variables](#environment-variables)
 - [Node Server](#node-server)
   - [Clone the Repository](#clone-the-repository)
   - [Install Dependencies](#install-dependencies)
@@ -170,6 +171,17 @@ net start MySQL
 
 ```
 sudo systemctl start mysql
+```
+
+### Environment Variables
+
+To configure your database connection securely, you need to create a `.env` file in the root of the project.
+
+```
+DB_HOST=localhost          # The hostname of your database server
+DB_USER=root               # Your MySQL username
+DB_PASSWORD=yourpassword   # Your MySQL password
+DB_NAME=InsuranceApp       # The name of your MySQL database
 ```
 
 ## Node Server

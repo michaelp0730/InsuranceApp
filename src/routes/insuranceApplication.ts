@@ -1,21 +1,58 @@
 import express, { Request, Response } from "express";
 import InsuranceApplication from "../interfaces/InsuranceApplication";
 import InsuranceApplicationValidator from "../validators/InsuranceApplicationValidator";
+import pool from "../pool";
 
 const router = express.Router();
 
-router.post("/", (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   const insuranceApplication = req.body as InsuranceApplication;
   const validator = new InsuranceApplicationValidator(insuranceApplication);
   const validationErrors = validator.validate();
 
   if (validationErrors.length > 0) {
-    return res.status(400).json({ errors: validationErrors });
+    res.status(400).json({ errors: validationErrors });
+    return;
   }
 
-  // Placeholder for database logic
   try {
     console.log(`Application: ${JSON.stringify(insuranceApplication)}`);
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      addressStreet,
+      addressCity,
+      addressState,
+      addressZipCode,
+      vehicleAVin,
+      vehicleAYear,
+      vehicleAMakeModel,
+    } = insuranceApplication;
+
+    const sql = `
+      INSERT INTO applications (
+        firstName, lastName, dateOfBirth, addressStreet, addressCity, addressState, addressZipCode,
+        vehicleAVin, vehicleAYear, vehicleAMakeModel
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const params = [
+      firstName,
+      lastName,
+      dateOfBirth,
+      addressStreet,
+      addressCity,
+      addressState,
+      addressZipCode,
+      vehicleAVin,
+      vehicleAYear,
+      vehicleAMakeModel,
+    ];
+
+    const [result] = await pool.execute(sql, params);
+    console.log("Database Insertion Result:", result);
+
     res
       .status(201)
       .json({ message: "Insurance application submitted successfully" });
