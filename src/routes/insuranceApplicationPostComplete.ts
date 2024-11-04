@@ -21,14 +21,6 @@ router.post("/", async (req: Request, res: Response) => {
   const validator = new InsuranceApplicationValidator(insuranceApplication);
   const validationErrors = validator.validateCompleteApplication();
 
-  // Check if the vehicles array meets the required conditions
-  const { vehicles } = insuranceApplication;
-  if (!vehicles || vehicles.length === 0) {
-    validationErrors.push("At least one vehicle is required.");
-  } else if (vehicles.length > 3) {
-    validationErrors.push("A policy cannot have more than 3 vehicles.");
-  }
-
   if (validationErrors.length > 0) {
     res.status(400).json({ errors: validationErrors });
     return;
@@ -50,6 +42,7 @@ router.post("/", async (req: Request, res: Response) => {
       addressState,
       addressZipCode,
       people,
+      vehicles,
     } = insuranceApplication;
 
     // Check if the application already exists

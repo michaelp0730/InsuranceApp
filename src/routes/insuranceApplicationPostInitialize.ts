@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import InsuranceApplication from "../interfaces/InsuranceApplication";
 import InsuranceApplicationValidator from "../validators/InsuranceApplicationValidator";
+import VehicleValidator from "../validators/VehicleValidator"; // Import VehicleValidator
 import pool from "../pool";
 
 const router = express.Router();
@@ -9,6 +10,21 @@ router.post("/", async (req: Request, res: Response) => {
   const partialApplication = req.body as Partial<InsuranceApplication>;
   const validator = new InsuranceApplicationValidator(partialApplication);
   const validationErrors = validator.validatePartialApplication();
+
+  // Validate vehicles if provided
+  if (partialApplication.vehicles && partialApplication.vehicles.length > 0) {
+    if (partialApplication.vehicles.length > 3) {
+      validationErrors.push("A policy cannot have more than 3 vehicles.");
+    } else {
+      partialApplication.vehicles.forEach((vehicle, index) => {
+        const vehicleValidator = new VehicleValidator(vehicle);
+        const vehicleErrors = vehicleValidator.validate();
+        vehicleErrors.forEach((error) => {
+          validationErrors.push(`Vehicle ${index + 1}: ${error}`);
+        });
+      });
+    }
+  }
 
   if (validationErrors.length > 0) {
     res.status(400).json({ errors: validationErrors });
@@ -55,21 +71,6 @@ router.post("/", async (req: Request, res: Response) => {
       values.push(partialApplication.addressZipCode);
       placeholders.push("?");
     }
-    if (partialApplication.vehicleAVin) {
-      fields.push("vehicleAVin");
-      values.push(partialApplication.vehicleAVin);
-      placeholders.push("?");
-    }
-    if (partialApplication.vehicleAYear) {
-      fields.push("vehicleAYear");
-      values.push(partialApplication.vehicleAYear);
-      placeholders.push("?");
-    }
-    if (partialApplication.vehicleAMakeModel) {
-      fields.push("vehicleAMakeModel");
-      values.push(partialApplication.vehicleAMakeModel);
-      placeholders.push("?");
-    }
 
     if (fields.length === 0) {
       res
@@ -86,9 +87,25 @@ router.post("/", async (req: Request, res: Response) => {
     const [result] = await pool.execute(sql, values);
     const applicationId = (result as any).insertId;
 
-    res
-      .status(201)
-      .json({ message: "Application initialized successfully", applicationId });
+    // Insert vehicles if provided
+    if (partialApplication.vehicles && partialApplication.vehicles.length > 0) {
+      const vehicleSql = `
+        INSERT INTO vehicles (applicationId, vin, year, makeModel)
+        VALUES (?, ?, ?, ?)
+      `;
+
+      for (const vehicle of partialApplication.vehicles) {
+        await pool.execute(vehicleSql, [
+          applicationId,
+          vehicle.vin,
+          vehicle.year,
+          vehicle.makeModel,
+        ]);
+      }
+    }
+
+    // Return the applicationId for the front-end to construct a link allowing the user to resume the application
+    res.status(201).json({ applicationId });
   } catch (error) {
     console.error(`Error initializing insurance application: ${error}`);
     res.status(500).json({ error: "Internal Server Error" });

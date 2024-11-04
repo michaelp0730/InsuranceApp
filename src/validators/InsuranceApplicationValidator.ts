@@ -24,10 +24,16 @@ class InsuranceApplicationValidator {
     }
 
     // Validate applicant fields
-    if (!this.application.firstName) this.errors.push("firstName is required.");
-    if (!this.application.lastName) this.errors.push("lastName is required.");
+    if (!this.application.firstName)
+      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("firstName"));
+
+    if (!this.application.lastName)
+      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("lastName"));
+
     if (!this.application.dateOfBirth) {
-      this.errors.push("dateOfBirth is required.");
+      this.errors.push(
+        ValidationUtils.getNonEmptyStringErrorMsg("dateOfBirth")
+      );
     } else if (
       !DateValidator.isAtLeast16YearsOld(this.application.dateOfBirth)
     ) {

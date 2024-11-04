@@ -1,7 +1,6 @@
 import InsuranceApplicationValidator from "../validators/InsuranceApplicationValidator";
 import InsuranceApplication from "../interfaces/InsuranceApplication";
 import Person from "../interfaces/Person";
-import Vehicle from "../interfaces/Vehicle";
 import ValidationUtils from "../utils/ValidationUtils";
 
 describe("InsuranceApplicationValidator", () => {
@@ -38,21 +37,27 @@ describe("InsuranceApplicationValidator", () => {
     application.firstName = "";
     const validator = new InsuranceApplicationValidator(application);
     const errors = validator.validateCompleteApplication();
-    expect(errors).toContain("firstName is required.");
+    expect(errors).toContain(
+      ValidationUtils.getNonEmptyStringErrorMsg("firstName")
+    );
   });
 
   it("should return an error if lastName is missing", () => {
     application.lastName = "";
     const validator = new InsuranceApplicationValidator(application);
     const errors = validator.validateCompleteApplication();
-    expect(errors).toContain("lastName is required.");
+    expect(errors).toContain(
+      ValidationUtils.getNonEmptyStringErrorMsg("lastName")
+    );
   });
 
   it("should return an error if dateOfBirth is missing", () => {
     application.dateOfBirth = null as any; // Cast to `any` to simulate missing date
     const validator = new InsuranceApplicationValidator(application);
     const errors = validator.validateCompleteApplication();
-    expect(errors).toContain("dateOfBirth is required.");
+    expect(errors).toContain(
+      ValidationUtils.getNonEmptyStringErrorMsg("dateOfBirth")
+    );
   });
 
   it("should return an error if the applicant is under 16 years old", () => {
