@@ -1,4 +1,5 @@
 import Person from "./Person";
+import Vehicle from "./Vehicle";
 
 interface InsuranceApplication {
   applicationId: string;
@@ -9,15 +10,7 @@ interface InsuranceApplication {
   addressCity: string;
   addressState: string;
   addressZipCode: number;
-  vehicleAVin: string;
-  vehicleAYear: number;
-  vehicleAMakeModel: string;
-  vehicleBVin?: string;
-  vehicleBYear?: number;
-  vehicleBMakeModel?: string;
-  vehicleCVin?: string;
-  vehicleCYear?: number;
-  vehicleCMakeModel?: string;
+  vehicles: Vehicle[];
   people?: Person[];
 }
 

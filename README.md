@@ -127,15 +127,6 @@ CREATE TABLE applications (
   addressCity VARCHAR(50) NOT NULL,
   addressState VARCHAR(50) NOT NULL,
   addressZipCode INT NOT NULL,
-  vehicleAVin VARCHAR(17) NOT NULL,
-  vehicleAYear INT NOT NULL,
-  vehicleAMakeModel VARCHAR(50) NOT NULL,
-  vehicleBVin VARCHAR(17),
-  vehicleBYear INT,
-  vehicleBMakeModel VARCHAR(50),
-  vehicleCVin VARCHAR(17),
-  vehicleCYear INT,
-  vehicleCMakeModel VARCHAR(50),
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -147,6 +138,17 @@ CREATE TABLE people (
   lastName VARCHAR(50) NOT NULL,
   dateOfBirth DATE NOT NULL,
   relationship VARCHAR(50),
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (applicationId) REFERENCES applications(applicationId) ON DELETE CASCADE
+);
+
+-- Vehicles table
+CREATE TABLE vehicles (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  applicationId VARCHAR(36) NOT NULL,
+  vin VARCHAR(17) NOT NULL,
+  year INT NOT NULL,
+  makeModel VARCHAR(50) NOT NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (applicationId) REFERENCES applications(applicationId) ON DELETE CASCADE
 );

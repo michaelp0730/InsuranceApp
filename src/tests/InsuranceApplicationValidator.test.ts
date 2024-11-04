@@ -1,6 +1,7 @@
 import InsuranceApplicationValidator from "../validators/InsuranceApplicationValidator";
 import InsuranceApplication from "../interfaces/InsuranceApplication";
 import Person from "../interfaces/Person";
+import Vehicle from "../interfaces/Vehicle";
 import ValidationUtils from "../utils/ValidationUtils";
 
 describe("InsuranceApplicationValidator", () => {
@@ -16,9 +17,13 @@ describe("InsuranceApplicationValidator", () => {
       addressCity: "Anytown",
       addressState: "CA",
       addressZipCode: 12345,
-      vehicleAVin: "1HGCM82633A123456",
-      vehicleAYear: 2020,
-      vehicleAMakeModel: "Honda Accord",
+      vehicles: [
+        {
+          vin: "1HGCM82633A123456",
+          year: 2020,
+          makeModel: "Honda Accord",
+        },
+      ],
       people: [],
     };
   });
@@ -73,42 +78,50 @@ describe("InsuranceApplicationValidator", () => {
     expect(errors).toContain("addressZipCode must contain only numbers.");
   });
 
-  it("should return an error if vehicleA details are missing", () => {
-    application.vehicleAVin = "";
-    application.vehicleAYear = null as any;
-    application.vehicleAMakeModel = "";
+  it("should return an error if vehicles array is empty", () => {
+    application.vehicles = [];
+    const validator = new InsuranceApplicationValidator(application);
+    const errors = validator.validateCompleteApplication();
+    expect(errors).toContain("At least one vehicle is required.");
+  });
+
+  it("should return an error if there are more than 3 vehicles", () => {
+    application.vehicles = [
+      { vin: "1HGCM82633A123456", year: 2020, makeModel: "Honda Accord" },
+      { vin: "1HGCM82633A654321", year: 2019, makeModel: "Toyota Camry" },
+      { vin: "1HGCM82633A987654", year: 2018, makeModel: "Ford Mustang" },
+      { vin: "1HGCM82633A111111", year: 2017, makeModel: "Chevrolet Tahoe" },
+    ];
+    const validator = new InsuranceApplicationValidator(application);
+    const errors = validator.validateCompleteApplication();
+    expect(errors).toContain("A policy cannot have more than 3 vehicles.");
+  });
+
+  it("should return an error if a vehicle VIN is empty", () => {
+    application.vehicles[0].vin = "";
     const validator = new InsuranceApplicationValidator(application);
     const errors = validator.validateCompleteApplication();
     expect(errors).toContain(
-      "vehicleA (VIN, year, and MakeModel) is required."
+      `Vehicle 1: ${ValidationUtils.getNonEmptyStringErrorMsg("VIN")}`
     );
   });
 
-  it("should return an error if vehicleA year is out of range", () => {
-    application.vehicleAYear = 1980;
+  it("should return an error if a vehicle year is out of range", () => {
+    application.vehicles[0].year = 1980;
     const validator = new InsuranceApplicationValidator(application);
     const errors = validator.validateCompleteApplication();
-    expect(errors).toContain("vehicleA year must be between 1985 and 2025.");
+    expect(errors).toContain("Vehicle 1: Year must be between 1985 and 2025."); // Adjust the max year as needed
   });
 
-  it("should return an error if vehicleB details are incomplete", () => {
-    application.vehicleBVin = "1HGCM82633A654321";
-    application.vehicleBYear = null as any;
-    application.vehicleBMakeModel = "";
+  it("should return an error if a vehicle makeModel is empty", () => {
+    application.vehicles[0].makeModel = "";
     const validator = new InsuranceApplicationValidator(application);
     const errors = validator.validateCompleteApplication();
     expect(errors).toContain(
-      "vehicleB must have VIN, year, and MakeModel if included."
+      `Vehicle 1: ${ValidationUtils.getNonEmptyStringErrorMsg(
+        "Make and model"
+      )}`
     );
-  });
-
-  it("should return an error if vehicleB year is out of range", () => {
-    application.vehicleBVin = "1HGCM82633A654321";
-    application.vehicleBYear = 2030;
-    application.vehicleBMakeModel = "Toyota Camry";
-    const validator = new InsuranceApplicationValidator(application);
-    const errors = validator.validateCompleteApplication();
-    expect(errors).toContain("vehicleB year must be between 1985 and 2025.");
   });
 
   it("should validate multiple people correctly", () => {

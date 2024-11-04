@@ -2,6 +2,7 @@ import express from "express";
 import insuranceApplicationGetRoutes from "./routes/insuranceApplicationGetRoutes";
 import insuranceApplicationPostCompleteRoute from "./routes/insuranceApplicationPostComplete";
 import insuranceApplicationPostInitializeRoute from "./routes/insuranceApplicationPostInitialize";
+import insuranceApplicationPutRoute from "./routes/insuranceApplicationPut";
 
 const app = express();
 const port = 5150;
@@ -9,6 +10,7 @@ const port = 5150;
 app.use(express.json());
 
 app.use("/api/get-application", insuranceApplicationGetRoutes);
+app.use("/api/update-application", insuranceApplicationPutRoute);
 
 app.use(
   "/api/post-complete-application",

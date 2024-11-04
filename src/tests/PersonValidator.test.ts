@@ -90,9 +90,19 @@ describe("PersonValidator", () => {
     };
     const validator = new PersonValidator(person);
     const errors = validator.validate();
-    expect(errors).toContain("firstName must be a non-empty string.");
-    expect(errors).toContain("lastName must be a non-empty string.");
-    expect(errors).toContain("relationship must be a non-empty string.");
+
+    expect(errors).toContain(
+      ValidationUtils.getNonEmptyStringErrorMsg("firstName")
+    );
+
+    expect(errors).toContain(
+      ValidationUtils.getNonEmptyStringErrorMsg("lastName")
+    );
+
+    expect(errors).toContain(
+      ValidationUtils.getNonEmptyStringErrorMsg("relationship")
+    );
+
     expect(errors).toContain("dateOfBirth must be a valid date.");
   });
 });
