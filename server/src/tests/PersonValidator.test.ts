@@ -69,11 +69,23 @@ describe("PersonValidator", () => {
     expect(errors).toContain("dateOfBirth must be a valid date.");
   });
 
-  it("should return an error if the person is younger than 16 years old", () => {
+  it("should return an error if the person was born today", () => {
     const person: Person = {
       firstName: "John",
       lastName: "Doe",
-      dateOfBirth: new Date(), // Today's date, meaning age is 0
+      dateOfBirth: new Date(),
+      relationship: "Spouse",
+    };
+    const validator = new PersonValidator(person);
+    const errors = validator.validate();
+    expect(errors).toContain(ValidationUtils.getMinAgeErrorMsg());
+  });
+
+  it("should return an error if the person is less than 16 years old", () => {
+    const person: Person = {
+      firstName: "John",
+      lastName: "Doe",
+      dateOfBirth: new Date("2020-12-31"),
       relationship: "Spouse",
     };
     const validator = new PersonValidator(person);
