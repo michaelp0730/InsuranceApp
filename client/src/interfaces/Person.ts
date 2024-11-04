@@ -1,7 +1,7 @@
 interface Person {
   firstName: string;
   lastName: string;
-  dateOfBirth: Date;
+  dateOfBirth: { month: string; date: string; year: string };
   relationship: string;
 }
 

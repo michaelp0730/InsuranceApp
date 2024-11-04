@@ -59,7 +59,7 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
     <fieldset>
       <h2 className="display-6">Primary Applicant</h2>
       <div className="row">
-        <div className="col-md-4">
+        <div className="col-lg-4 mt-3">
           <label htmlFor="firstName">First Name</label>
           <br />
           <input
@@ -69,7 +69,7 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
             onChange={handleChange}
           />
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 mt-3">
           <label htmlFor="lastName">Last Name</label>
           <br />
           <input
@@ -79,7 +79,7 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
             onChange={handleChange}
           />
         </div>
-        <div className="col-md-4">
+        <div className="col-lg-4 mt-3">
           <label htmlFor="birth-date-select">Date of Birth</label>
           <br />
           <DateOfBirthSelector
@@ -89,7 +89,7 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
         </div>
       </div>
       <div className="row mt-5">
-        <div className="col-md-4">
+        <div className="col-lg-4 mt-3">
           <label htmlFor="address-street-input">Street Address</label>
           <br />
           <input
@@ -101,7 +101,7 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
         </div>
         <div className="col-md-8">
           <div className="row">
-            <div className="col-md-4">
+            <div className="col-lg-4 mt-3">
               <label htmlFor="address-city-input">City</label>
               <br />
               <input
@@ -111,13 +111,13 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
                 onChange={handleChange}
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 mt-3">
               <StateSelector
                 state={primaryApplicant.addressState}
                 setState={setState}
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-lg-4 mt-3">
               <label htmlFor="addressZipCode">Zip Code</label>
               <br />
               <input

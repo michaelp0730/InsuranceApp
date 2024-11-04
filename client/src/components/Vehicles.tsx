@@ -37,7 +37,7 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, setVehicles }) => {
       <h2 className="display-6">Vehicles</h2>
       <div className="row">
         {vehicles.map((vehicle, index) => (
-          <div className="col-md-4" key={`col-${index}`}>
+          <div className="col-lg-4" key={`col-${index}`}>
             <div key={`card-${index}`} className="card p-3 my-3">
               <p>
                 <label>VIN:</label>

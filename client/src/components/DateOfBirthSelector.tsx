@@ -27,7 +27,7 @@ const DateOfBirthSelector: React.FC<DateOfBirthSelectorProps> = ({
 
   return (
     <div className="row">
-      <div className="col-md-4">
+      <div className="col-lg-4 mt-3 mt-lg-0">
         <select name="birth-month" value={month} onChange={handleMonthChange}>
           <option value="01">January</option>
           <option value="02">February</option>
@@ -43,7 +43,7 @@ const DateOfBirthSelector: React.FC<DateOfBirthSelectorProps> = ({
           <option value="12">December</option>
         </select>
       </div>
-      <div className="col-md-4">
+      <div className="col-lg-4 mt-3 mt-lg-0">
         <select name="birth-date" value={date} onChange={handleDateChange}>
           {Array.from({ length: 31 }, (_, i) => i + 1).map((num) => (
             <option key={num} value={num}>
@@ -52,7 +52,7 @@ const DateOfBirthSelector: React.FC<DateOfBirthSelectorProps> = ({
           ))}
         </select>
       </div>
-      <div className="col-md-4">
+      <div className="col-lg-4 mt-3 mt-lg-0">
         <select name="birth-year" value={year} onChange={handleYearChange}>
           {Array.from({ length: 2024 - 1930 + 1 }, (_, i) => 2024 - i).map(
             (year) => (
