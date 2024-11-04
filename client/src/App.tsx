@@ -1,15 +1,15 @@
-import { useState } from "react";
+import ApplicationForm from "./components/ApplicationForm";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <div className="container">
-      <h1>InsuranceApp</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+    <div className="container my-5">
+      <h1 className="display-4">InsuranceApp</h1>
+      <p>
+        Please submit the form below to receive an auto insurance quote. You may
+        save the form and submit it later if needed.
+      </p>
+      <div className="mt-5">
+        <ApplicationForm />
       </div>
     </div>
   );
