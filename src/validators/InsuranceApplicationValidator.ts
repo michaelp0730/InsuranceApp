@@ -1,23 +1,41 @@
+import DateValidator from "./DateValidator";
 import InsuranceApplication from "../interfaces/InsuranceApplication";
 import Person from "../interfaces/Person";
+import PersonValidator from "./PersonValidator";
+import ValidationUtils from "../utils/ValidationUtils";
 
 class InsuranceApplicationValidator {
-  private application: InsuranceApplication;
+  private application: Partial<InsuranceApplication>;
   private errors: string[];
+  private maxVehicleYear: number;
+  private minVehicleYear: number;
 
-  constructor(application: InsuranceApplication) {
+  constructor(application: Partial<InsuranceApplication>) {
+    const currentYear = new Date().getFullYear();
     this.application = application;
     this.errors = [];
+    this.maxVehicleYear = currentYear + 1;
+    this.minVehicleYear = 1985;
   }
 
-  validate(): string[] {
-    // Validate required fields
+  validateCompleteApplication(): string[] {
+    // Validate applicationId
+    if (
+      !this.application.applicationId ||
+      !ValidationUtils.isValidUUID(this.application.applicationId)
+    ) {
+      this.errors.push("applicationId must be a valid UUID.");
+    }
+
+    // Validate applicant fields
     if (!this.application.firstName) this.errors.push("firstName is required.");
     if (!this.application.lastName) this.errors.push("lastName is required.");
     if (!this.application.dateOfBirth) {
       this.errors.push("dateOfBirth is required.");
-    } else if (!this.isAtLeast16YearsOld(this.application.dateOfBirth)) {
-      this.errors.push("Applicant must be at least 16 years old.");
+    } else if (
+      !DateValidator.isAtLeast16YearsOld(this.application.dateOfBirth)
+    ) {
+      this.errors.push(ValidationUtils.getMinAgeErrorMsg());
     }
 
     // Validate address fields
@@ -25,24 +43,30 @@ class InsuranceApplicationValidator {
       !this.application.addressStreet ||
       this.application.addressStreet.trim() === ""
     ) {
-      this.errors.push("addressStreet must be a non-empty string.");
+      this.errors.push(
+        ValidationUtils.getNonEmptyStringErrorMsg("addressStreet")
+      );
     }
 
     if (
       !this.application.addressCity ||
       this.application.addressCity.trim() === ""
     ) {
-      this.errors.push("addressCity must be a non-empty string.");
+      this.errors.push(
+        ValidationUtils.getNonEmptyStringErrorMsg("addressCity")
+      );
     }
 
     if (
       !this.application.addressState ||
       this.application.addressState.trim() === ""
     ) {
-      this.errors.push("addressState must be a non-empty string.");
+      this.errors.push(
+        ValidationUtils.getNonEmptyStringErrorMsg("addressState")
+      );
     }
 
-    if (!/^\d+$/.test(this.application.addressZipCode.toString())) {
+    if (!/^\d+$/.test(this.application?.addressZipCode?.toString() ?? "")) {
       this.errors.push("addressZipCode must contain only numbers.");
     }
 
@@ -52,40 +76,84 @@ class InsuranceApplicationValidator {
     return this.errors;
   }
 
-  private isAtLeast16YearsOld(dateOfBirth: Date): boolean {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    const age = today.getFullYear() - birthDate.getFullYear();
-
-    // Check if the birthday has occurred this year
-    const hasHadBirthdayThisYear =
-      today.getMonth() > birthDate.getMonth() ||
-      (today.getMonth() === birthDate.getMonth() &&
-        today.getDate() >= birthDate.getDate());
-
-    // If the birthday has not occurred yet this year, subtract 1 from the age
-    return hasHadBirthdayThisYear ? age >= 16 : age - 1 >= 16;
+  validatePartialApplication(): string[] {
+    if (
+      this.application.firstName !== undefined &&
+      !this.application.firstName.trim()
+    ) {
+      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("firstName"));
+    }
+    if (
+      this.application.lastName !== undefined &&
+      !this.application.lastName.trim()
+    ) {
+      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("lastName"));
+    }
+    if (this.application.dateOfBirth !== undefined) {
+      if (
+        !(this.application.dateOfBirth instanceof Date) ||
+        isNaN(this.application.dateOfBirth.getTime())
+      ) {
+        this.errors.push("dateOfBirth must be a valid date.");
+      }
+    }
+    if (
+      this.application.addressState !== undefined &&
+      !this.application.addressState.trim()
+    ) {
+      this.errors.push(
+        ValidationUtils.getNonEmptyStringErrorMsg("addressState")
+      );
+    }
+    if (
+      this.application.addressZipCode !== undefined &&
+      (!Number.isInteger(this.application.addressZipCode) ||
+        this.application.addressZipCode <= 0)
+    ) {
+      this.errors.push("addressZipCode must be a positive integer.");
+    }
+    // Validate vehicleA only if any of its fields are provided
+    if (
+      this.application.vehicleAVin !== undefined ||
+      this.application.vehicleAYear !== undefined ||
+      this.application.vehicleAMakeModel !== undefined
+    ) {
+      if (!this.application.vehicleAVin?.trim()) {
+        this.errors.push(
+          ValidationUtils.getNonEmptyStringErrorMsg("vehicleAVin")
+        );
+      }
+      if (
+        this.application.vehicleAYear !== undefined &&
+        (this.application.vehicleAYear < this.minVehicleYear ||
+          this.application.vehicleAYear > new Date().getFullYear() + 1)
+      ) {
+        this.errors.push(
+          `vehicleAYear must be between ${this.minVehicleYear} and the current year + 1.`
+        );
+      }
+      if (!this.application.vehicleAMakeModel?.trim()) {
+        this.errors.push(
+          ValidationUtils.getNonEmptyStringErrorMsg("vehicleAMakeModel")
+        );
+      }
+    }
+    return this.errors;
   }
 
   private validateVehicles(): void {
-    const currentYear = new Date().getFullYear();
-    const minYear = 1985;
-    const maxYear = currentYear + 1;
-
     // Validate vehicleA (required)
     if (
       !this.application.vehicleAVin ||
       !this.application.vehicleAYear ||
       !this.application.vehicleAMakeModel
     ) {
-      this.errors.push("VehicleA (VIN, year, and MakeModel) is required.");
+      this.errors.push("vehicleA (VIN, year, and MakeModel) is required.");
     } else if (
-      this.application.vehicleAYear < minYear ||
-      this.application.vehicleAYear > maxYear
+      this.application.vehicleAYear < this.minVehicleYear ||
+      this.application.vehicleAYear > this.maxVehicleYear
     ) {
-      this.errors.push(
-        this.getVehicleYearsErrorMsg("VehicleA", minYear, maxYear)
-      );
+      this.errors.push(this.getVehicleYearsErrorMsg("vehicleA"));
     }
 
     // Validate vehicleB (optional but must be complete if included)
@@ -99,14 +167,12 @@ class InsuranceApplicationValidator {
         !this.application.vehicleBYear ||
         !this.application.vehicleBMakeModel
       ) {
-        this.errors.push(this.getVehicleRequiredFieldsErrorMsg("VehicleB"));
+        this.errors.push(this.getVehicleRequiredFieldsErrorMsg("vehicleB"));
       } else if (
-        this.application.vehicleBYear < minYear ||
-        this.application.vehicleBYear > maxYear
+        this.application.vehicleBYear < this.minVehicleYear ||
+        this.application.vehicleBYear > this.maxVehicleYear
       ) {
-        this.errors.push(
-          this.getVehicleYearsErrorMsg("VehicleB", minYear, maxYear)
-        );
+        this.errors.push(this.getVehicleYearsErrorMsg("vehicleB"));
       }
     }
 
@@ -121,33 +187,24 @@ class InsuranceApplicationValidator {
         !this.application.vehicleCYear ||
         !this.application.vehicleCMakeModel
       ) {
-        this.errors.push(this.getVehicleRequiredFieldsErrorMsg("VehicleC"));
+        this.errors.push(this.getVehicleRequiredFieldsErrorMsg("vehicleC"));
       } else if (
-        this.application.vehicleCYear < minYear ||
-        this.application.vehicleCYear > maxYear
+        this.application.vehicleCYear < this.minVehicleYear ||
+        this.application.vehicleCYear > this.maxVehicleYear
       ) {
-        this.errors.push(
-          this.getVehicleYearsErrorMsg("VehicleC", minYear, maxYear)
-        );
+        this.errors.push(this.getVehicleYearsErrorMsg("vehicleC"));
       }
     }
   }
 
   private validatePeople(people: Person[]): void {
     people.forEach((person, index) => {
-      if (!person.firstName) {
-        this.errors.push(`Person ${index + 1}: firstName is required.`);
-      }
+      const personValidator = new PersonValidator(person);
+      const personErrors = personValidator.validate();
 
-      if (!person.lastName) {
-        this.errors.push(`Person ${index + 1}: lastName is required.`);
-      }
-
-      if (!person.dateOfBirth) {
-        this.errors.push(`Person ${index + 1}: dateOfBirth is required.`);
-      } else if (!this.isAtLeast16YearsOld(person.dateOfBirth)) {
-        this.errors.push(`Person ${index + 1}: must be at least 16 years old.`);
-      }
+      personErrors.forEach((error) => {
+        this.errors.push(`Person ${index + 1}: ${error}`);
+      });
     });
   }
 
@@ -155,12 +212,8 @@ class InsuranceApplicationValidator {
     return `${vehicleName} must have VIN, year, and MakeModel if included.`;
   }
 
-  private getVehicleYearsErrorMsg(
-    vehicleName: string,
-    minYear: number,
-    maxYear: number
-  ): string {
-    return `${vehicleName} year must be between ${minYear} and ${maxYear}.`;
+  private getVehicleYearsErrorMsg(vehicleName: string): string {
+    return `${vehicleName} year must be between ${this.minVehicleYear} and ${this.maxVehicleYear}.`;
   }
 }
 

@@ -1,6 +1,7 @@
 import Person from "./Person";
 
 interface InsuranceApplication {
+  applicationId: string;
   firstName: string;
   lastName: string;
   dateOfBirth: Date;

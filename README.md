@@ -119,6 +119,7 @@ USE InsuranceApp
 -- Applications table
 CREATE TABLE applications (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  applicationId VARCHAR(36) NOT NULL UNIQUE,
   firstName VARCHAR(50) NOT NULL,
   lastName VARCHAR(50) NOT NULL,
   dateOfBirth DATE NOT NULL,
@@ -141,13 +142,13 @@ CREATE TABLE applications (
 -- People table
 CREATE TABLE people (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  applicationId INT NOT NULL,
+  applicationId VARCHAR(36) NOT NULL,
   firstName VARCHAR(50) NOT NULL,
   lastName VARCHAR(50) NOT NULL,
   dateOfBirth DATE NOT NULL,
   relationship VARCHAR(50),
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (applicationId) REFERENCES applications(id) ON DELETE CASCADE
+  FOREIGN KEY (applicationId) REFERENCES applications(applicationId) ON DELETE CASCADE
 );
 ```
 
