@@ -11,8 +11,8 @@ router.get(
 
     try {
       const applicationSql = `
-      SELECT * FROM applications WHERE applicationId = ?
-    `;
+        SELECT * FROM applications WHERE applicationId = ?
+      `;
       const [applications] = await connection.execute(applicationSql, [
         applicationId,
       ]);
@@ -25,13 +25,19 @@ router.get(
       const application = (applications as any[])[0];
 
       const peopleSql = `
-      SELECT * FROM people WHERE applicationId = ?
-    `;
+        SELECT * FROM people WHERE applicationId = ?
+      `;
       const [people] = await connection.execute(peopleSql, [applicationId]);
+
+      const vehiclesSql = `
+        SELECT * FROM vehicles WHERE applicationId = ?
+      `;
+      const [vehicles] = await connection.execute(vehiclesSql, [applicationId]);
 
       const result = {
         ...application,
         people: people as any[],
+        vehicles: vehicles as any[],
       };
 
       res.status(200).json(result);

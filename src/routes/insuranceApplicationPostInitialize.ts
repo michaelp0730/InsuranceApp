@@ -8,6 +8,36 @@ const router = express.Router();
 
 router.post("/", async (req: Request, res: Response) => {
   const partialApplication = req.body as Partial<InsuranceApplication>;
+
+  if (!partialApplication.applicationId) {
+    res.status(400).json({ error: "applicationId is required." });
+    return;
+  }
+
+  // Parse dateOfBirth for the primary applicant if provided
+  if (partialApplication.dateOfBirth) {
+    const parsedDate = new Date(partialApplication.dateOfBirth);
+    if (isNaN(parsedDate.getTime())) {
+      res.status(400).json({ errors: ["dateOfBirth must be a valid date."] });
+      return;
+    }
+    partialApplication.dateOfBirth = parsedDate;
+  }
+
+  // Parse dateOfBirth fields for the people array
+  if (partialApplication.people) {
+    partialApplication.people = partialApplication.people.map((person) => {
+      const parsedDate = new Date(person.dateOfBirth);
+      if (isNaN(parsedDate.getTime())) {
+        res.status(400).json({
+          errors: [`Person ${person.firstName} has an invalid dateOfBirth.`],
+        });
+        return person;
+      }
+      return { ...person, dateOfBirth: parsedDate };
+    });
+  }
+
   const validator = new InsuranceApplicationValidator(partialApplication);
   const validationErrors = validator.validatePartialApplication();
 
@@ -32,47 +62,54 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const fields: string[] = [];
-    const values: any[] = [];
-    const placeholders: string[] = [];
+    const fields: string[] = ["applicationId"];
+    const values: any[] = [partialApplication.applicationId];
+    const placeholders: string[] = ["?"];
 
     if (partialApplication.firstName) {
       fields.push("firstName");
       values.push(partialApplication.firstName);
       placeholders.push("?");
     }
+
     if (partialApplication.lastName) {
       fields.push("lastName");
       values.push(partialApplication.lastName);
       placeholders.push("?");
     }
+
     if (partialApplication.dateOfBirth) {
       fields.push("dateOfBirth");
       values.push(partialApplication.dateOfBirth);
       placeholders.push("?");
     }
+
     if (partialApplication.addressStreet) {
       fields.push("addressStreet");
       values.push(partialApplication.addressStreet);
       placeholders.push("?");
     }
+
     if (partialApplication.addressCity) {
       fields.push("addressCity");
       values.push(partialApplication.addressCity);
       placeholders.push("?");
     }
+
     if (partialApplication.addressState) {
       fields.push("addressState");
       values.push(partialApplication.addressState);
       placeholders.push("?");
     }
+
     if (partialApplication.addressZipCode) {
       fields.push("addressZipCode");
       values.push(partialApplication.addressZipCode);
       placeholders.push("?");
     }
 
-    if (fields.length === 0) {
+    if (fields.length === 1) {
+      // Only applicationId is present, which means no other fields to insert
       res
         .status(400)
         .json({ error: "No valid fields provided for initialization." });
@@ -85,7 +122,39 @@ router.post("/", async (req: Request, res: Response) => {
     `;
 
     const [result] = await pool.execute(sql, values);
-    const applicationId = (result as any).insertId;
+    const applicationId = partialApplication.applicationId;
+
+    // Insert the primary applicant into the people table
+    const primaryPersonSql = `
+      INSERT INTO people (applicationId, firstName, lastName, dateOfBirth, relationship)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+
+    await pool.execute(primaryPersonSql, [
+      applicationId,
+      partialApplication.firstName,
+      partialApplication.lastName,
+      partialApplication.dateOfBirth,
+      "Primary Applicant",
+    ]);
+
+    // Insert additional people if provided
+    if (partialApplication.people && partialApplication.people.length > 0) {
+      const peopleSql = `
+        INSERT INTO people (applicationId, firstName, lastName, dateOfBirth, relationship)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+
+      for (const person of partialApplication.people) {
+        await pool.execute(peopleSql, [
+          applicationId,
+          person.firstName,
+          person.lastName,
+          person.dateOfBirth,
+          person.relationship || null,
+        ]);
+      }
+    }
 
     // Insert vehicles if provided
     if (partialApplication.vehicles && partialApplication.vehicles.length > 0) {
