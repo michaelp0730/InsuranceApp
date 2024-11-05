@@ -32,12 +32,14 @@ interface PrimaryApplicantProps {
     addressZipCode?: string;
     addressState?: string;
   };
+  clearAlerts: () => void;
 }
 
 const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
   primaryApplicant,
   setPrimaryApplicant,
   errors,
+  clearAlerts,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,6 +47,7 @@ const PrimaryApplicant: React.FC<PrimaryApplicantProps> = ({
       ...prev,
       [name]: value,
     }));
+    clearAlerts();
   };
 
   const setDateOfBirth = (dateOfBirth: {

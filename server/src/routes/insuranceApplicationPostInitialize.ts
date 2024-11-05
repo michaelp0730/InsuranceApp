@@ -173,7 +173,6 @@ router.post("/", async (req: Request, res: Response) => {
       }
     }
 
-    // Return the applicationId for the front-end to construct a link allowing the user to resume the application
     res.status(201).json({ applicationId });
   } catch (error) {
     console.error(`Error initializing insurance application: ${error}`);

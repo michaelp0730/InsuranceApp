@@ -6,6 +6,7 @@ interface VehiclesProps {
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>;
   errors: string[][];
   genericError?: string;
+  clearAlerts: () => void;
 }
 
 const Vehicles: React.FC<VehiclesProps> = ({
@@ -13,6 +14,7 @@ const Vehicles: React.FC<VehiclesProps> = ({
   setVehicles,
   errors,
   genericError,
+  clearAlerts,
 }) => {
   const addVehicle = () => {
     setVehicles((prev) => [...prev, { vin: "", year: 0, makeModel: "" }]);
@@ -28,6 +30,7 @@ const Vehicles: React.FC<VehiclesProps> = ({
         i === index ? { ...vehicle, [name]: value } : vehicle
       )
     );
+    clearAlerts();
   };
 
   const deleteVehicle = (index: number) => {

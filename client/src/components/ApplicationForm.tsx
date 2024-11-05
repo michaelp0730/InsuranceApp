@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   addQueryStringToUrl,
   formatDateForDatabase,
@@ -16,6 +16,8 @@ import InsuranceApplicationSubmissionValidator from "../validators/InsuranceAppl
 import InsuranceApplicationSaveValidator from "../validators/InsuranceApplicationSaveValidator";
 
 const ApplicationForm = () => {
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
   const [errors, setErrors] = useState<{
     genericErrors: { [key: string]: string };
     vehicleErrors: string[][];
@@ -27,6 +29,7 @@ const ApplicationForm = () => {
   });
 
   const currentUrl = window.location.href;
+  const currentPort = window.location.port;
   const queryStringParams = new URLSearchParams(window.location.search);
   const applicationIdParam = queryStringParams.get("applicationId");
   const isExistingApplication =
@@ -50,8 +53,86 @@ const ApplicationForm = () => {
     []
   );
 
+  const clearAlerts = () => {
+    setAlertMessage("");
+    setAlertType("");
+  };
+
+  useEffect(() => {
+    // Only fetch data if it's an existing application
+    if (isExistingApplication) {
+      fetch(`http://localhost:5150/api/get-application/${applicationId}`)
+        .then((response) => {
+          if (!response.ok) {
+            console.error(
+              `Error getting application from database: ${JSON.stringify(
+                response
+              )}`
+            );
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Update the form state with the fetched data
+          setPrimaryApplicant({
+            firstName: data.firstName,
+            lastName: data.lastName,
+            dateOfBirth: {
+              month: new Date(data.dateOfBirth).toLocaleString("default", {
+                month: "long",
+              }),
+              date: new Date(data.dateOfBirth).getDate().toString(),
+              year: new Date(data.dateOfBirth).getFullYear().toString(),
+            },
+            addressStreet: data.addressStreet,
+            addressCity: data.addressCity,
+            addressState: data.addressState,
+            addressZipCode: data.addressZipCode.toString(),
+          });
+
+          setVehicles(
+            data.vehicles.map((vehicle: Vehicle) => ({
+              vin: vehicle.vin,
+              year: vehicle.year,
+              makeModel: vehicle.makeModel,
+            }))
+          );
+
+          setAdditionalApplicants(
+            data.people
+              .filter(
+                (person: Person) => person.relationship !== "Primary Applicant"
+              )
+              .map((person: any) => ({
+                firstName: person.firstName,
+                lastName: person.lastName,
+                dateOfBirth: {
+                  month: new Date(person.dateOfBirth).toLocaleString(
+                    "default",
+                    {
+                      month: "long",
+                    }
+                  ),
+                  date: new Date(person.dateOfBirth).getDate().toString(),
+                  year: new Date(person.dateOfBirth).getFullYear().toString(),
+                },
+                relationship: person.relationship,
+              }))
+          );
+        })
+        .catch((error) => {
+          console.error("Error fetching application:", error);
+          setAlertType("alert-danger");
+          setAlertMessage(
+            `Failed to load application data. Please try again, or begin at new application at http://localhost:${currentPort}`
+          );
+        });
+    }
+  }, [isExistingApplication, applicationId]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    clearAlerts();
 
     const { month, date, year } = primaryApplicant.dateOfBirth;
     const formattedDateOfBirth = new Date(`${year}-${month}-${date}`);
@@ -180,19 +261,29 @@ const ApplicationForm = () => {
         }
       );
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to save the application");
+        setAlertMessage(responseData.message);
+        setAlertType("alert-danger");
+      } else {
+        setAlertMessage(responseData.message);
+        setAlertType("alert-success");
       }
 
       console.log("Application saved successfully:", applicationData);
-      console.log(`Submission response: ${JSON.stringify(response)}`);
     } catch (error) {
       console.error("Error saving application:", error);
+      setAlertType("alert-danger");
+      setAlertMessage(
+        "There was an error saving your application. Please try again."
+      );
     }
   };
 
-  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
+    clearAlerts();
 
     const { month, date, year } = primaryApplicant.dateOfBirth;
     const formattedDateOfBirth = new Date(`${year}-${month}-${date}`);
@@ -301,6 +392,45 @@ const ApplicationForm = () => {
       dateOfBirth: dateOfBirthString,
     };
 
+    try {
+      let response;
+
+      if (!isExistingApplication) {
+        // If it's a new application, post to the initialize route
+        response = await fetch(
+          "http://localhost:5150/api/post-initialize-application",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(applicationData),
+          }
+        );
+      } else {
+        response = {
+          ok: true,
+          message: "foobar",
+        };
+      }
+
+      if (!response.ok) {
+        setAlertType("alert-danger");
+        setAlertMessage(
+          "There was an error saving your application. Please try again."
+        );
+      } else {
+        setAlertType("alert-success");
+        setAlertMessage(
+          `Thank you for saving your auto insurance application. ` +
+            `Please revisit this application at http://localhost:${currentPort}/?applicationId=${applicationId}, ` +
+            `or keep this page open, to complete your application.`
+        );
+      }
+    } catch (error) {
+      console.error("Error saving insurance application:", error);
+    }
+
     const queryParams = {
       applicationId,
     };
@@ -311,26 +441,36 @@ const ApplicationForm = () => {
   };
 
   return (
-    <form className="card p-5" onSubmit={handleSubmit}>
-      <PrimaryApplicant
-        primaryApplicant={primaryApplicant}
-        setPrimaryApplicant={setPrimaryApplicant}
-        errors={errors.genericErrors}
-      />
-      <Vehicles
-        vehicles={vehicles}
-        setVehicles={setVehicles}
-        errors={errors.vehicleErrors}
-        genericError={errors.genericErrors.vehicles}
-      />
-      <AdditionalApplicants
-        additionalApplicants={additionalApplicants}
-        setAdditionalApplicants={setAdditionalApplicants}
-        errors={errors.applicantErrors}
-        setErrors={setErrors}
-      />
-      <SaveSubmitButtons onSave={handleSave} />
-    </form>
+    <>
+      {alertMessage && (
+        <div className={`alert ${alertType}`} role="alert">
+          {alertMessage}
+        </div>
+      )}
+      <form className="card p-5" onSubmit={handleSubmit}>
+        <PrimaryApplicant
+          primaryApplicant={primaryApplicant}
+          setPrimaryApplicant={setPrimaryApplicant}
+          errors={errors.genericErrors}
+          clearAlerts={clearAlerts}
+        />
+        <Vehicles
+          vehicles={vehicles}
+          setVehicles={setVehicles}
+          errors={errors.vehicleErrors}
+          genericError={errors.genericErrors.vehicles}
+          clearAlerts={clearAlerts}
+        />
+        <AdditionalApplicants
+          additionalApplicants={additionalApplicants}
+          setAdditionalApplicants={setAdditionalApplicants}
+          errors={errors.applicantErrors}
+          setErrors={setErrors}
+          clearAlerts={clearAlerts}
+        />
+        <SaveSubmitButtons onSave={handleSave} />
+      </form>
+    </>
   );
 };
 

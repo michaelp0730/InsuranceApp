@@ -5,6 +5,7 @@ import DateOfBirthSelector from "./DateOfBirthSelector";
 interface AdditionalApplicantsProps {
   additionalApplicants: Person[];
   setAdditionalApplicants: React.Dispatch<React.SetStateAction<Person[]>>;
+  clearAlerts: () => void;
   errors: { [key: string]: string }[];
   setErrors: React.Dispatch<
     React.SetStateAction<{
@@ -18,6 +19,7 @@ interface AdditionalApplicantsProps {
 const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
   additionalApplicants,
   setAdditionalApplicants,
+  clearAlerts,
   errors,
   setErrors,
 }) => {
@@ -40,6 +42,8 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
 
       return { ...prevErrors, applicantErrors: newErrors };
     });
+
+    clearAlerts();
   };
 
   const handleApplicantChange = (
@@ -52,6 +56,7 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
         i === index ? { ...applicant, [name]: value } : applicant
       )
     );
+    clearAlerts();
   };
 
   const handleDateOfBirthChange = (
@@ -63,6 +68,7 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
         i === index ? { ...applicant, dateOfBirth } : applicant
       )
     );
+    clearAlerts();
   };
 
   const deleteApplicant = (index: number) => {
@@ -78,6 +84,7 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
       );
       return { ...prevErrors, applicantErrors: newErrors };
     });
+    clearAlerts();
   };
 
   return (
