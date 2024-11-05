@@ -45,19 +45,6 @@ const ApplicationForm = () => {
     []
   );
 
-  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-
-    const applicationData = {
-      applicationId,
-      primaryApplicant,
-      vehicles,
-      additionalApplicants,
-    };
-
-    console.log("Saving application:", applicationData);
-  };
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -80,36 +67,40 @@ const ApplicationForm = () => {
       applicationData
     );
     const validationErrors = validator.validate();
-
     const genericErrors: { [key: string]: string } = {};
-    const vehicleErrors: string[][] = Array(vehicles.length).fill([]);
+
+    const vehicleErrors: string[][] = Array.from(
+      { length: vehicles.length },
+      () => []
+    );
+
     const applicantErrors: { [key: string]: string }[] = Array(
       additionalApplicants.length
     ).fill({});
 
+    // Map validation errors to the correct fields
     validationErrors.forEach((error) => {
-      // Generic errors for primary applicant and address
-      if (error.includes("Primary Applicant first name is required."))
+      if (error.includes("Primary Applicant first name is required"))
         genericErrors.firstName = error;
       if (error.includes("Primary Applicant last name is required"))
         genericErrors.lastName = error;
       if (
-        error.includes("Primary applicant must be at least 16 years old.") ||
-        error.includes("Primary Applicant date of birth is required.")
+        error.includes("Primary applicant must be at least 16 years old") ||
+        error.includes("Primary Applicant date of birth is required")
       )
         genericErrors.dateOfBirth = error;
-      if (error.includes("Primary Applicant street address is required."))
+      if (error.includes("Primary Applicant street address is required"))
         genericErrors.addressStreet = error;
-      if (error.includes("Primary Applicant city is required."))
+      if (error.includes("Primary Applicant city is required"))
         genericErrors.addressCity = error;
-      if (error.includes("Primary Applicant state is required."))
+      if (error.includes("Primary Applicant state is required"))
         genericErrors.addressState = error;
-      if (error.includes("Primary Applicant zip code must be a valid number."))
+      if (error.includes("Primary Applicant zip code must be a valid number"))
         genericErrors.addressZipCode = error;
       if (error.includes("At least one vehicle"))
         genericErrors.vehicles = error;
 
-      // Vehicle errors
+      // Handle vehicle-specific errors
       const vehicleMatch = error.match(/Vehicle (\d+): (.+)/);
       if (vehicleMatch) {
         const vehicleIndex = parseInt(vehicleMatch[1], 10) - 1;
@@ -120,12 +111,11 @@ const ApplicationForm = () => {
         vehicleErrors[vehicleIndex].push(vehicleError);
       }
 
-      // Additional applicant errors
+      // Handle additional applicant-specific errors
       const applicantMatch = error.match(/Applicant (\d+): (.+)/);
       if (applicantMatch) {
         const applicantIndex = parseInt(applicantMatch[1], 10) - 1;
         const applicantError = applicantMatch[2];
-
         if (!applicantErrors[applicantIndex]) {
           applicantErrors[applicantIndex] = {};
         }
@@ -159,6 +149,19 @@ const ApplicationForm = () => {
     if (hasErrors) return;
 
     console.log("Submitting application:", applicationData);
+  };
+
+  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    const applicationData = {
+      applicationId,
+      primaryApplicant,
+      vehicles,
+      additionalApplicants,
+    };
+
+    console.log("Saving application:", applicationData);
   };
 
   return (

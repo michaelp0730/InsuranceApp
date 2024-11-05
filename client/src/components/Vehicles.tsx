@@ -45,7 +45,7 @@ const Vehicles: React.FC<VehiclesProps> = ({
       <div className="row">
         {vehicles.map((vehicle, index) => (
           <div className="col-lg-4" key={`col-${index}`}>
-            <div className="card p-3 my-2" key={`card-${index}`}>
+            <div className="card p-3 my-2">
               <div className="row">
                 <div className="my-3">
                   <label>VIN:</label>
@@ -56,12 +56,11 @@ const Vehicles: React.FC<VehiclesProps> = ({
                     value={vehicle.vin}
                     onChange={(e) => handleVehicleChange(index, e)}
                   />
-                  {errors[index] &&
-                    errors[index].map((error, i) => (
-                      <p key={i} className="text-danger">
-                        <small>{error}</small>
-                      </p>
-                    ))}
+                  {errors[index]?.map((error, i) => (
+                    <p key={i} className="text-danger">
+                      <small>{error}</small>
+                    </p>
+                  ))}
                 </div>
                 <div className="my-2">
                   <label>Year:</label>
