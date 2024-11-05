@@ -3,30 +3,36 @@ import Person from "../interfaces/Person";
 class PersonValidator {
   private person: Person;
   private errors: string[];
+  private prefix: string;
 
-  constructor(person: Person) {
+  constructor(person: Person, index?: number) {
     this.person = person;
     this.errors = [];
+    this.prefix = index !== undefined ? `Applicant ${index + 1}: ` : "";
   }
 
   validate(): string[] {
     this.errors = [];
 
     if (!this.person.firstName || this.person.firstName.trim() === "") {
-      this.errors.push("First name is required.");
+      this.errors.push(`${this.prefix}First name is required.`);
     }
 
     if (!this.person.lastName || this.person.lastName.trim() === "") {
-      this.errors.push("Last name is required.");
+      this.errors.push(`${this.prefix}Last name is required.`);
     }
 
     if (!this.person.dateOfBirth) {
-      this.errors.push("Date of birth is required.");
+      this.errors.push(`${this.prefix}Date of birth is required.`);
     } else {
       const formattedDate = this.formatDateOfBirth(this.person.dateOfBirth);
       if (!this.isAtLeast16YearsOld(formattedDate)) {
-        this.errors.push("Person must be at least 16 years old.");
+        this.errors.push(`${this.prefix}Person must be at least 16 years old.`);
       }
+    }
+
+    if (!this.person.relationship || this.person.relationship.trim() === "") {
+      this.errors.push(`${this.prefix}Relationship is required.`);
     }
 
     return this.errors;

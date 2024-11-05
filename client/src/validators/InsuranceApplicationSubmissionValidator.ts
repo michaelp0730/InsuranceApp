@@ -14,59 +14,83 @@ class InsuranceApplicationSubmissionValidator {
   validate(): string[] {
     this.errors = [];
 
-    const dateOfBirth = this.convertDateToPersonFormat(
-      this.application.dateOfBirth
-    );
+    // Validate primary applicant fields directly
+    if (
+      !this.application.firstName ||
+      this.application.firstName.trim() === ""
+    ) {
+      this.errors.push("Primary Applicant first name is required.");
+    }
 
-    const primaryApplicantValidator = new PersonValidator({
-      firstName: this.application.firstName,
-      lastName: this.application.lastName,
-      dateOfBirth: dateOfBirth,
-      relationship: "Primary Applicant",
-    });
-    const primaryApplicantErrors = primaryApplicantValidator.validate();
+    if (!this.application.lastName || this.application.lastName.trim() === "") {
+      this.errors.push("Primary Applicant last name is required.");
+    }
 
-    if (primaryApplicantErrors.length > 0) {
-      this.errors.push(...primaryApplicantErrors);
+    if (!this.application.dateOfBirth) {
+      this.errors.push("Primary Applicant date of birth is required.");
+    } else {
+      const formattedDate = this.convertDateToPersonFormat(
+        this.application.dateOfBirth
+      );
+      if (!this.isAtLeast16YearsOld(formattedDate)) {
+        this.errors.push("Primary applicant must be at least 16 years old.");
+      }
     }
 
     if (
       !this.application.addressStreet ||
       this.application.addressStreet.trim() === ""
     ) {
-      this.errors.push("Address street is required.");
+      this.errors.push("Primary Applicant street address is required.");
     }
 
     if (
       !this.application.addressCity ||
       this.application.addressCity.trim() === ""
     ) {
-      this.errors.push("Address city is required.");
+      this.errors.push("Primary Applicant city is required.");
     }
 
     if (
       !this.application.addressState ||
       this.application.addressState.trim() === ""
     ) {
-      this.errors.push("Address state is required.");
+      this.errors.push("Primary Applicant state is required.");
     }
 
     if (
       !this.application.addressZipCode ||
       isNaN(this.application.addressZipCode)
     ) {
-      this.errors.push("Address zip code must be a valid number.");
+      this.errors.push("Primary Applicant zip code must be a valid number.");
     }
 
+    // Validate vehicles
     if (!this.application.vehicles || this.application.vehicles.length === 0) {
       this.errors.push("At least one vehicle is required.");
     } else {
       this.application.vehicles.forEach((vehicle, index) => {
         const vehicleValidator = new VehicleValidator(vehicle);
         const vehicleErrors = vehicleValidator.validate();
-        vehicleErrors.forEach((error) => {
-          this.errors.push(`Vehicle ${index + 1}: ${error}`);
-        });
+        if (vehicleErrors.length > 0) {
+          vehicleErrors.forEach((error) => {
+            this.errors.push(`Vehicle ${index + 1}: ${error}`);
+          });
+        }
+      });
+    }
+
+    // Validate additional applicants using PersonValidator
+    if (this.application.people) {
+      this.application.people.forEach((applicant, index) => {
+        const additionalApplicantValidator = new PersonValidator(
+          applicant,
+          index
+        );
+        const applicantErrors = additionalApplicantValidator.validate();
+        if (applicantErrors.length > 0) {
+          this.errors.push(...applicantErrors);
+        }
       });
     }
 
@@ -97,6 +121,27 @@ class InsuranceApplicationSubmissionValidator {
       date: date.getDate().toString(),
       year: date.getFullYear().toString(),
     };
+  }
+
+  private isAtLeast16YearsOld(dateOfBirth: {
+    month: string;
+    date: string;
+    year: string;
+  }): boolean {
+    const dob = new Date(
+      `${dateOfBirth.year}-${dateOfBirth.month}-${dateOfBirth.date}`
+    );
+    if (isNaN(dob.getTime())) {
+      return false;
+    }
+
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear();
+    const hasHadBirthdayThisYear =
+      today.getMonth() > dob.getMonth() ||
+      (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate());
+
+    return age > 16 || (age === 16 && hasHadBirthdayThisYear);
   }
 }
 

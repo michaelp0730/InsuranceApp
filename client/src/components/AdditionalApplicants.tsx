@@ -5,18 +5,21 @@ import DateOfBirthSelector from "./DateOfBirthSelector";
 interface AdditionalApplicantsProps {
   additionalApplicants: Person[];
   setAdditionalApplicants: React.Dispatch<React.SetStateAction<Person[]>>;
-  errors: {
-    firstName?: string;
-    lastName?: string;
-    dateOfBirth?: string;
-    relationship?: string;
-  };
+  errors: { [key: string]: string }[];
+  setErrors: React.Dispatch<
+    React.SetStateAction<{
+      genericErrors: { [key: string]: string };
+      vehicleErrors: string[][];
+      applicantErrors: { [key: string]: string }[];
+    }>
+  >;
 }
 
 const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
   additionalApplicants,
   setAdditionalApplicants,
   errors,
+  setErrors,
 }) => {
   const addApplicant = () => {
     setAdditionalApplicants((prev) => [
@@ -28,6 +31,15 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
         relationship: "",
       },
     ]);
+
+    // Clear errors for the new applicant
+    setErrors((prevErrors) => {
+      const newErrors = Array.isArray(prevErrors.applicantErrors)
+        ? [...prevErrors.applicantErrors, {}] // Add a new empty object for the new applicant
+        : [{}]; // Initialize with an empty object if it wasn't an array already
+
+      return { ...prevErrors, applicantErrors: newErrors };
+    });
   };
 
   const handleApplicantChange = (
@@ -55,6 +67,17 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
 
   const deleteApplicant = (index: number) => {
     setAdditionalApplicants((prev) => prev.filter((_, i) => i !== index));
+
+    // Clear errors for the deleted applicant
+    setErrors((prevErrors) => {
+      if (!Array.isArray(prevErrors.applicantErrors)) {
+        return prevErrors;
+      }
+      const newErrors = prevErrors.applicantErrors.filter(
+        (_, i) => i !== index
+      );
+      return { ...prevErrors, applicantErrors: newErrors };
+    });
   };
 
   return (
@@ -71,9 +94,9 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               value={applicant.firstName}
               onChange={(e) => handleApplicantChange(index, e)}
             />
-            {errors.firstName && (
+            {errors[index]?.firstName && (
               <p>
-                <small className="text-danger">{errors.firstName}</small>
+                <small className="text-danger">{errors[index].firstName}</small>
               </p>
             )}
           </div>
@@ -86,9 +109,9 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               value={applicant.lastName}
               onChange={(e) => handleApplicantChange(index, e)}
             />
-            {errors.lastName && (
+            {errors[index]?.lastName && (
               <p>
-                <small className="text-danger">{errors.lastName}</small>
+                <small className="text-danger">{errors[index].lastName}</small>
               </p>
             )}
           </div>
@@ -100,9 +123,9 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               setDateOfBirth={(date) => handleDateOfBirthChange(index, date)}
             />
           </div>
-          {errors.dateOfBirth && (
+          {errors[index]?.dateOfBirth && (
             <p>
-              <small className="text-danger">{errors.dateOfBirth}</small>
+              <small className="text-danger">{errors[index].dateOfBirth}</small>
             </p>
           )}
           <div className="col-lg-3">
@@ -114,9 +137,11 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               value={applicant.relationship}
               onChange={(e) => handleApplicantChange(index, e)}
             />
-            {errors.relationship && (
+            {errors[index]?.relationship && (
               <p>
-                <small className="text-danger">{errors.relationship}</small>
+                <small className="text-danger">
+                  {errors[index].relationship}
+                </small>
               </p>
             )}
           </div>
