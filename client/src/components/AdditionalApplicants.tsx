@@ -5,11 +5,18 @@ import DateOfBirthSelector from "./DateOfBirthSelector";
 interface AdditionalApplicantsProps {
   additionalApplicants: Person[];
   setAdditionalApplicants: React.Dispatch<React.SetStateAction<Person[]>>;
+  errors: {
+    firstName?: string;
+    lastName?: string;
+    dateOfBirth?: string;
+    relationship?: string;
+  };
 }
 
 const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
   additionalApplicants,
   setAdditionalApplicants,
+  errors,
 }) => {
   const addApplicant = () => {
     setAdditionalApplicants((prev) => [
@@ -64,6 +71,11 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               value={applicant.firstName}
               onChange={(e) => handleApplicantChange(index, e)}
             />
+            {errors.firstName && (
+              <p>
+                <small className="text-danger">{errors.firstName}</small>
+              </p>
+            )}
           </div>
           <div className="col-lg-3">
             <label>Last Name:</label>
@@ -74,6 +86,11 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               value={applicant.lastName}
               onChange={(e) => handleApplicantChange(index, e)}
             />
+            {errors.lastName && (
+              <p>
+                <small className="text-danger">{errors.lastName}</small>
+              </p>
+            )}
           </div>
           <div className="col-lg-3">
             <label>Date of Birth:</label>
@@ -83,6 +100,11 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               setDateOfBirth={(date) => handleDateOfBirthChange(index, date)}
             />
           </div>
+          {errors.dateOfBirth && (
+            <p>
+              <small className="text-danger">{errors.dateOfBirth}</small>
+            </p>
+          )}
           <div className="col-lg-3">
             <label>Relationship:</label>
             <br />
@@ -92,6 +114,11 @@ const AdditionalApplicants: React.FC<AdditionalApplicantsProps> = ({
               value={applicant.relationship}
               onChange={(e) => handleApplicantChange(index, e)}
             />
+            {errors.relationship && (
+              <p>
+                <small className="text-danger">{errors.relationship}</small>
+              </p>
+            )}
           </div>
           <p>
             <button

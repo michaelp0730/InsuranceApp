@@ -4,9 +4,19 @@ import Vehicle from "../interfaces/Vehicle";
 interface VehiclesProps {
   vehicles: Vehicle[];
   setVehicles: Dispatch<SetStateAction<Vehicle[]>>;
+  errors: {
+    vehicles?: string;
+    vin?: string;
+    year?: string;
+    makeModel?: string;
+  };
 }
 
-const Vehicles: React.FC<VehiclesProps> = ({ vehicles, setVehicles }) => {
+const Vehicles: React.FC<VehiclesProps> = ({
+  vehicles,
+  setVehicles,
+  errors,
+}) => {
   const addVehicle = () => {
     setVehicles((prev) => [...prev, { vin: "", year: 2025, makeModel: "" }]);
   };
@@ -48,6 +58,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, setVehicles }) => {
                   value={vehicle.vin}
                   onChange={(e) => handleVehicleChange(index, e)}
                 />
+                {errors.vin && (
+                  <p>
+                    <small className="text-danger">{errors.vin}</small>
+                  </p>
+                )}
               </p>
               <p>
                 <label>Year:</label>
@@ -58,6 +73,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, setVehicles }) => {
                   value={vehicle.year}
                   onChange={(e) => handleVehicleChange(index, e)}
                 />
+                {errors.year && (
+                  <p>
+                    <small className="text-danger">{errors.year}</small>
+                  </p>
+                )}
               </p>
               <p>
                 <label>Make &amp; Model:</label>
@@ -68,6 +88,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, setVehicles }) => {
                   value={vehicle.makeModel}
                   onChange={(e) => handleVehicleChange(index, e)}
                 />
+                {errors.makeModel && (
+                  <p>
+                    <small className="text-danger">{errors.makeModel}</small>
+                  </p>
+                )}
               </p>
               <button
                 type="button"
@@ -90,6 +115,11 @@ const Vehicles: React.FC<VehiclesProps> = ({ vehicles, setVehicles }) => {
             Add Vehicle
           </button>
         ))}
+      {errors.vehicles && (
+        <p>
+          <small className="text-danger">{errors.vehicles}</small>
+        </p>
+      )}
     </fieldset>
   );
 };
