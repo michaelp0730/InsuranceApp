@@ -15,6 +15,7 @@ import handleSubmit from "../utils/SubmitHandler";
 const ApplicationForm = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
+  // const [isNewApplicationSubmitted, setIsNewApplicationSubmitted] = useState(false);
   const [errors, setErrors] = useState<{
     genericErrors: { [key: string]: string };
     vehicleErrors: string[][];
@@ -57,7 +58,7 @@ const ApplicationForm = () => {
     setAlertMessage("");
     setAlertType("");
   };
-
+  /*
   useEffect(() => {
     // Only fetch data if it's an existing application
     if (isExistingApplication) {
@@ -129,7 +130,7 @@ const ApplicationForm = () => {
         });
     }
   }, [isExistingApplication, applicationId, currentPort]);
-
+*/
   return (
     <>
       {alertMessage && (

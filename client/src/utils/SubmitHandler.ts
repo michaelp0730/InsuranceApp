@@ -107,11 +107,29 @@ const handleSubmit = async (
 
   if (hasErrors) return;
 
-  const dateOfBirthString = formatDateForDatabase(applicationData.dateOfBirth);
+  // Format the primary applicant's date of birth as a string
+  const primaryApplicantDobString = formatDateForDatabase(
+    applicationData.dateOfBirth
+  );
+
+  // Format the additional applicants' date of birth as strings, ensuring valid dates
+  const formattedPeople =
+    applicationData.people?.map((person) => {
+      const { month, date, year } = person.dateOfBirth;
+      const dobString = `${year}-${month}-${date}`;
+      const dob = new Date(dobString);
+
+      return {
+        ...person,
+        // Check if the constructed date is valid
+        dateOfBirth: !isNaN(dob.getTime()) ? formatDateForDatabase(dob) : null,
+      };
+    }) || [];
 
   const updatedApplicationData = {
     ...applicationData,
-    dateOfBirth: dateOfBirthString,
+    dateOfBirth: primaryApplicantDobString,
+    people: formattedPeople,
   };
 
   const queryParams = {
@@ -142,7 +160,7 @@ const handleSubmit = async (
       setAlertType("alert-success");
     }
 
-    console.log("Application saved successfully:", applicationData);
+    console.log("Application saved successfully:", updatedApplicationData);
   } catch (error) {
     console.error("Error saving application:", error);
     setAlertType("alert-danger");

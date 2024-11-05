@@ -111,9 +111,24 @@ const handleSave = async (
   if (hasErrors) return;
 
   const dateOfBirthString = formatDateForDatabase(applicationData.dateOfBirth);
+
+  // Format the additional applicants' date of birth as strings, ensuring valid dates
+  const formattedPeople =
+    applicationData.people?.map((person) => {
+      const { month, date, year } = person.dateOfBirth;
+      const dobString = `${year}-${month}-${date}`;
+      const dob = new Date(dobString);
+
+      return {
+        ...person,
+        dateOfBirth: !isNaN(dob.getTime()) ? formatDateForDatabase(dob) : null,
+      };
+    }) || [];
+
   const updatedApplicationData = {
     ...applicationData,
     dateOfBirth: dateOfBirthString,
+    people: formattedPeople,
   };
 
   try {
