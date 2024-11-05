@@ -4,8 +4,15 @@ import insuranceApplicationPostCompleteRoute from "./routes/insuranceApplication
 import insuranceApplicationPostInitializeRoute from "./routes/insuranceApplicationPostInitialize";
 import insuranceApplicationPutRoute from "./routes/insuranceApplicationPut";
 
+const cors = require("cors");
 const app = express();
 const port = 5150;
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
 
 app.use(express.json());
 

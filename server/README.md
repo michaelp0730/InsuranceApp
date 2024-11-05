@@ -23,6 +23,7 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
 - [Node Server](#node-server)
   - [Clone the Repository](#clone-the-repository)
   - [Install Server Dependencies](#install-server-dependencies)
+  - [CORS Configuration](#cors-configuration)
   - [Starting the Server](#starting-the-server)
   - [Running Tests](#running-tests)
     - [Run All Tests](#run-all-tests)
@@ -209,6 +210,19 @@ npm install
 ```
 
 This command will read the `package.json` file and install all the dependencies listed under `dependencies` and `devDependencies`.
+
+### CORS Configuration
+
+The Node server has CORS configured to accept traffic from http://localhost:5173.
+The React client is built with Vite, which typically runs on port 5173. If your client is running on a different port, you will need to modify this line in `server.ts` to allow the port your client is running on.
+
+```
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
+```
 
 ### Starting the Server
 

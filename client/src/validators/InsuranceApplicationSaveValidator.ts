@@ -6,7 +6,7 @@ import {
   isAtLeast16YearsOld,
 } from "../utils/ValidatorUtils";
 
-class InsuranceApplicationSubmissionValidator {
+class InsuranceApplicationSaveValidator {
   private application: InsuranceApplication;
   private errors: string[];
 
@@ -18,21 +18,19 @@ class InsuranceApplicationSubmissionValidator {
   validate(): string[] {
     this.errors = [];
 
-    // Validate primary applicant fields directly
+    // Validate primary applicant fields only if provided
     if (
-      !this.application.firstName ||
+      this.application.firstName &&
       this.application.firstName.trim() === ""
     ) {
-      this.errors.push("Primary Applicant first name is required.");
+      this.errors.push("Primary Applicant first name must not be empty.");
     }
 
-    if (!this.application.lastName || this.application.lastName.trim() === "") {
-      this.errors.push("Primary Applicant last name is required.");
+    if (this.application.lastName && this.application.lastName.trim() === "") {
+      this.errors.push("Primary Applicant last name must not be empty.");
     }
 
-    if (!this.application.dateOfBirth) {
-      this.errors.push("Primary Applicant date of birth is required.");
-    } else {
+    if (this.application.dateOfBirth) {
       const formattedDate = convertDateToPersonFormat(
         this.application.dateOfBirth
       );
@@ -42,37 +40,35 @@ class InsuranceApplicationSubmissionValidator {
     }
 
     if (
-      !this.application.addressStreet ||
+      this.application.addressStreet &&
       this.application.addressStreet.trim() === ""
     ) {
-      this.errors.push("Primary Applicant street address is required.");
+      this.errors.push("Primary Applicant street address must not be empty.");
     }
 
     if (
-      !this.application.addressCity ||
+      this.application.addressCity &&
       this.application.addressCity.trim() === ""
     ) {
-      this.errors.push("Primary Applicant city is required.");
+      this.errors.push("Primary Applicant city must not be empty.");
     }
 
     if (
-      !this.application.addressState ||
+      this.application.addressState &&
       this.application.addressState.trim() === ""
     ) {
-      this.errors.push("Primary Applicant state is required.");
+      this.errors.push("Primary Applicant state must not be empty.");
     }
 
     if (
-      !this.application.addressZipCode ||
+      this.application.addressZipCode &&
       isNaN(this.application.addressZipCode)
     ) {
       this.errors.push("Primary Applicant zip code must be a valid number.");
     }
 
-    // Validate vehicles
-    if (!this.application.vehicles || this.application.vehicles.length === 0) {
-      this.errors.push("At least one vehicle is required.");
-    } else {
+    // Validate vehicles only if provided
+    if (this.application.vehicles) {
       this.application.vehicles.forEach((vehicle, index) => {
         const vehicleValidator = new VehicleValidator(vehicle);
         const vehicleErrors = vehicleValidator.validate();
@@ -84,7 +80,7 @@ class InsuranceApplicationSubmissionValidator {
       });
     }
 
-    // Validate additional applicants using PersonValidator
+    // Validate additional applicants only if provided using PersonValidator
     if (this.application.people) {
       this.application.people.forEach((applicant, index) => {
         const additionalApplicantValidator = new PersonValidator(
@@ -102,4 +98,4 @@ class InsuranceApplicationSubmissionValidator {
   }
 }
 
-export default InsuranceApplicationSubmissionValidator;
+export default InsuranceApplicationSaveValidator;
