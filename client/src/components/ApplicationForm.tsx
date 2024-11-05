@@ -74,7 +74,6 @@ const ApplicationForm = () => {
       applicationData
     );
     const validationErrors = validator.validate();
-    console.log(validationErrors);
 
     const errorMap: { [key: string]: string | string[][] } = {};
     const vehicleErrors: string[][] = Array(vehicles.length).fill([]);
@@ -89,7 +88,6 @@ const ApplicationForm = () => {
       if (error.includes("zip code")) errorMap.addressZipCode = error;
       if (error.includes("At least one vehicle")) errorMap.vehicles = error;
 
-      // Map vehicle errors
       const vehicleMatch = error.match(/Vehicle (\d+): (.+)/);
       if (vehicleMatch) {
         const vehicleIndex = parseInt(vehicleMatch[1], 10) - 1;
@@ -127,6 +125,9 @@ const ApplicationForm = () => {
         vehicles={vehicles}
         setVehicles={setVehicles}
         errors={Array.isArray(errors.vehicleErrors) ? errors.vehicleErrors : []}
+        genericError={
+          typeof errors.vehicles === "string" ? errors.vehicles : undefined
+        }
       />
       <AdditionalApplicants
         additionalApplicants={additionalApplicants}

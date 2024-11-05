@@ -5,12 +5,14 @@ interface VehiclesProps {
   vehicles: Vehicle[];
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>;
   errors: string[][];
+  genericError?: string;
 }
 
 const Vehicles: React.FC<VehiclesProps> = ({
   vehicles,
   setVehicles,
   errors,
+  genericError,
 }) => {
   const addVehicle = () => {
     setVehicles((prev) => [...prev, { vin: "", year: 0, makeModel: "" }]);
@@ -35,6 +37,11 @@ const Vehicles: React.FC<VehiclesProps> = ({
   return (
     <fieldset className="mt-5">
       <h2 className="display-6">Vehicles</h2>
+      {genericError && (
+        <p className="text-danger">
+          <small>{genericError}</small>
+        </p>
+      )}
       <div className="row">
         {vehicles.map((vehicle, index) => (
           <div className="col-lg-4" key={`col-${index}`}>
