@@ -107,6 +107,7 @@ router.post("/", async (req: Request, res: Response) => {
       values.push(partialApplication.addressZipCode);
       placeholders.push("?");
     }
+    console.log(`fields: ${fields}`);
 
     if (fields.length === 1) {
       // Only applicationId is present, which means no other fields to insert

@@ -31,6 +31,7 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
   - [Install Client Dependencies](#install-client-dependencies)
   - [Running the Client Project](#running-the-client-project)
   - [Building the Client Project](#building-the-client-project)
+  - [Saving an Application](#saving-an-application)
 - [Project Structure](#project-structure)
 
 ## Prerequisites
@@ -128,10 +129,10 @@ CREATE TABLE applications (
   firstName VARCHAR(50) NOT NULL,
   lastName VARCHAR(50) NOT NULL,
   dateOfBirth DATE NOT NULL,
-  addressStreet VARCHAR(100) NOT NULL,
-  addressCity VARCHAR(50) NOT NULL,
-  addressState VARCHAR(50) NOT NULL,
-  addressZipCode INT NOT NULL,
+  addressStreet VARCHAR(100),
+  addressCity VARCHAR(50),
+  addressState VARCHAR(50),
+  addressZipCode INT,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -282,6 +283,10 @@ npm run dev
 ```
 npm run build
 ```
+
+### Saving an Application
+
+The minimum amount of information required to save an application is the first name, last name, and date of birth for the primary applicant. If a vehicle is added to the application, all three fields (VIN, Year, and Make/Model) are required before saving.
 
 ### Project Structure
 
