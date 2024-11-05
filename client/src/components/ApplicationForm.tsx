@@ -134,7 +134,10 @@ const ApplicationForm = () => {
           applicantErrors[applicantIndex].firstName = applicantError;
         } else if (applicantError.includes("Last name")) {
           applicantErrors[applicantIndex].lastName = applicantError;
-        } else if (applicantError.includes("Date of birth")) {
+        } else if (
+          applicantError.includes("Date of birth") ||
+          applicantError.includes("at least 16 years old")
+        ) {
           applicantErrors[applicantIndex].dateOfBirth = applicantError;
         } else if (applicantError.includes("Relationship")) {
           applicantErrors[applicantIndex].relationship = applicantError;
