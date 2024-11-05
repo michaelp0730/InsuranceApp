@@ -62,7 +62,6 @@ const ApplicationForm = () => {
 
   useEffect(() => {
     if (isExistingApplication && !isNewApplicationSubmitted) {
-      // Add a delay before making the GET request
       const fetchTimeout = setTimeout(() => {
         fetch(`http://localhost:5150/api/get-application/${applicationId}`)
           .then((response) => {
@@ -76,19 +75,21 @@ const ApplicationForm = () => {
             return response.json();
           })
           .then((data) => {
-            // Update the form state with the fetched data
+            // Parse the dateOfBirth and check if it's a valid date
+            const parsedDate = new Date(data.dateOfBirth);
+            const isValidDate = !isNaN(parsedDate.getTime());
+
             setPrimaryApplicant({
               firstName: data.firstName || "",
               lastName: data.lastName || "",
-              dateOfBirth: {
-                month:
-                  new Date(data.dateOfBirth).toLocaleString("default", {
-                    month: "long",
-                  }) || "January",
-                date: new Date(data.dateOfBirth).getDate().toString() || "1",
-                year:
-                  new Date(data.dateOfBirth).getFullYear().toString() || "2024",
-              },
+              dateOfBirth: isValidDate
+                ? {
+                    // Use numerical format for month: "01", "02", etc.
+                    month: ("0" + (parsedDate.getMonth() + 1)).slice(-2),
+                    date: parsedDate.getDate().toString(),
+                    year: parsedDate.getFullYear().toString(),
+                  }
+                : { month: "01", date: "1", year: "2024" }, // Default values if the date is invalid
               addressStreet: data.addressStreet || "",
               addressCity: data.addressCity || "",
               addressState: data.addressState || "",
@@ -109,29 +110,29 @@ const ApplicationForm = () => {
                   (person: Person) =>
                     person.relationship !== "Primary Applicant"
                 )
-                .map((person: any) => ({
-                  firstName: person.firstName || "",
-                  lastName: person.lastName || "",
-                  dateOfBirth: {
-                    month:
-                      new Date(person.dateOfBirth).toLocaleString("default", {
-                        month: "long",
-                      }) || "January",
-                    date:
-                      new Date(person.dateOfBirth).getDate().toString() || "1",
-                    year:
-                      new Date(person.dateOfBirth).getFullYear().toString() ||
-                      "2024",
-                  },
-                  relationship: person.relationship || "",
-                })) || []
+                .map((person: any) => {
+                  const personDate = new Date(person.dateOfBirth);
+                  const personIsValidDate = !isNaN(personDate.getTime());
+                  return {
+                    firstName: person.firstName || "",
+                    lastName: person.lastName || "",
+                    dateOfBirth: personIsValidDate
+                      ? {
+                          month: ("0" + (personDate.getMonth() + 1)).slice(-2),
+                          date: personDate.getDate().toString(),
+                          year: personDate.getFullYear().toString(),
+                        }
+                      : { month: "01", date: "1", year: "2024" }, // Default values if the date is invalid
+                    relationship: person.relationship || "",
+                  };
+                }) || []
             );
           })
           .catch((error) => {
             console.error("Error fetching application:", error);
             setAlertType("alert-danger");
             setAlertMessage(
-              `Failed to load application data. Please try again, or begin at new application at http://localhost:${currentPort}`
+              `Failed to load application data. Please try again, or begin a new application at http://localhost:${currentPort}`
             );
           });
       }, 1000);
