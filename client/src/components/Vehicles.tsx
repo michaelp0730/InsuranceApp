@@ -1,15 +1,10 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
+import React from "react";
 import Vehicle from "../interfaces/Vehicle";
 
 interface VehiclesProps {
   vehicles: Vehicle[];
-  setVehicles: Dispatch<SetStateAction<Vehicle[]>>;
-  errors: {
-    vehicles?: string;
-    vin?: string;
-    year?: string;
-    makeModel?: string;
-  };
+  setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>;
+  errors: string[][];
 }
 
 const Vehicles: React.FC<VehiclesProps> = ({
@@ -18,22 +13,17 @@ const Vehicles: React.FC<VehiclesProps> = ({
   errors,
 }) => {
   const addVehicle = () => {
-    setVehicles((prev) => [...prev, { vin: "", year: 2025, makeModel: "" }]);
+    setVehicles((prev) => [...prev, { vin: "", year: 0, makeModel: "" }]);
   };
 
   const handleVehicleChange = (
     index: number,
-    e: ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { name, value } = e.target;
     setVehicles((prev) =>
       prev.map((vehicle, i) =>
-        i === index
-          ? {
-              ...vehicle,
-              [name]: name === "year" ? Number(value) : value,
-            }
-          : vehicle
+        i === index ? { ...vehicle, [name]: value } : vehicle
       )
     );
   };
@@ -48,78 +38,63 @@ const Vehicles: React.FC<VehiclesProps> = ({
       <div className="row">
         {vehicles.map((vehicle, index) => (
           <div className="col-lg-4" key={`col-${index}`}>
-            <div key={`card-${index}`} className="card p-3 my-3">
-              <p>
-                <label>VIN:</label>
-                <br />
-                <input
-                  type="text"
-                  name="vin"
-                  value={vehicle.vin}
-                  onChange={(e) => handleVehicleChange(index, e)}
-                />
-                {errors.vin && (
-                  <p>
-                    <small className="text-danger">{errors.vin}</small>
-                  </p>
-                )}
-              </p>
-              <p>
-                <label>Year:</label>
-                <br />
-                <input
-                  type="number"
-                  name="year"
-                  value={vehicle.year}
-                  onChange={(e) => handleVehicleChange(index, e)}
-                />
-                {errors.year && (
-                  <p>
-                    <small className="text-danger">{errors.year}</small>
-                  </p>
-                )}
-              </p>
-              <p>
-                <label>Make &amp; Model:</label>
-                <br />
-                <input
-                  type="text"
-                  name="makeModel"
-                  value={vehicle.makeModel}
-                  onChange={(e) => handleVehicleChange(index, e)}
-                />
-                {errors.makeModel && (
-                  <p>
-                    <small className="text-danger">{errors.makeModel}</small>
-                  </p>
-                )}
-              </p>
+            <div className="card p-3 my-2" key={`card-${index}`}>
+              <div className="row">
+                <div className="my-3">
+                  <label>VIN:</label>
+                  <br />
+                  <input
+                    type="text"
+                    name="vin"
+                    value={vehicle.vin}
+                    onChange={(e) => handleVehicleChange(index, e)}
+                  />
+                  {errors[index] &&
+                    errors[index].map((error, i) => (
+                      <p key={i} className="text-danger">
+                        <small>{error}</small>
+                      </p>
+                    ))}
+                </div>
+                <div className="my-2">
+                  <label>Year:</label>
+                  <br />
+                  <input
+                    type="number"
+                    name="year"
+                    value={vehicle.year || ""}
+                    onChange={(e) => handleVehicleChange(index, e)}
+                  />
+                </div>
+                <div className="my-2">
+                  <label>Make & Model:</label>
+                  <br />
+                  <input
+                    type="text"
+                    name="makeModel"
+                    value={vehicle.makeModel}
+                    onChange={(e) => handleVehicleChange(index, e)}
+                  />
+                </div>
+              </div>
               <button
                 type="button"
-                className="btn btn-danger"
+                className="btn btn-danger mt-2"
                 onClick={() => deleteVehicle(index)}
               >
-                Delete Vehicle
+                Remove Vehicle
               </button>
             </div>
           </div>
         ))}
       </div>
-      {!vehicles ||
-        (vehicles.length < 3 && (
-          <button
-            type="button"
-            className="btn btn-outline-primary"
-            onClick={addVehicle}
-          >
-            Add Vehicle
-          </button>
-        ))}
-      {errors.vehicles && (
-        <p>
-          <small className="text-danger">{errors.vehicles}</small>
-        </p>
-      )}
+      <button
+        type="button"
+        className="btn btn-outline-primary mt-3"
+        onClick={addVehicle}
+      >
+        Add Vehicle
+      </button>
     </fieldset>
   );
 };

@@ -6,15 +6,16 @@ import {
 import PrimaryApplicant from "./PrimaryApplicant";
 import Vehicle from "../interfaces/Vehicle";
 import Vehicles from "./Vehicles";
-import VehicleValidator from "../validators/VehicleValidator";
 import Person from "../interfaces/Person";
-import PersonValidator from "../validators/PersonValidator";
 import AdditionalApplicants from "./AdditionalApplicants";
 import SaveSubmitButtons from "./SaveSubmitButtons";
 import InsuranceApplicationSubmissionValidator from "../validators/InsuranceApplicationSubmissionValidator";
 
 const ApplicationForm = () => {
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<{ [key: string]: string | string[][] }>(
+    {}
+  );
+
   const queryStringParams = new URLSearchParams(window.location.search);
   const applicationIdParam = queryStringParams.get("applicationId");
   const isExistingApplication =
@@ -54,33 +55,29 @@ const ApplicationForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Convert dateOfBirth to a Date object
     const { month, date, year } = primaryApplicant.dateOfBirth;
     const formattedDateOfBirth = new Date(`${year}-${month}-${date}`);
-
-    // Flatten primaryApplicant properties into the applicationData object
     const applicationData = {
       applicationId,
       firstName: primaryApplicant.firstName,
       lastName: primaryApplicant.lastName,
-      dateOfBirth: formattedDateOfBirth, // Use the converted Date object
+      dateOfBirth: formattedDateOfBirth,
       addressStreet: primaryApplicant.addressStreet,
       addressCity: primaryApplicant.addressCity,
       addressState: primaryApplicant.addressState,
-      addressZipCode: Number(primaryApplicant.addressZipCode), // Ensure Zip Code is a number
+      addressZipCode: Number(primaryApplicant.addressZipCode),
       vehicles,
       additionalApplicants,
     };
 
-    // Instantiate and use InsuranceApplicationSubmissionValidator
     const validator = new InsuranceApplicationSubmissionValidator(
       applicationData
     );
     const validationErrors = validator.validate();
     console.log(validationErrors);
 
-    // Map validation errors to the form fields
-    const errorMap: { [key: string]: string } = {};
+    const errorMap: { [key: string]: string | string[][] } = {};
+    const vehicleErrors: string[][] = Array(vehicles.length).fill([]);
 
     validationErrors.forEach((error) => {
       if (error.includes("First name is required")) errorMap.firstName = error;
@@ -91,12 +88,30 @@ const ApplicationForm = () => {
       if (error.includes("state is required")) errorMap.addressState = error;
       if (error.includes("zip code")) errorMap.addressZipCode = error;
       if (error.includes("At least one vehicle")) errorMap.vehicles = error;
+
+      // Map vehicle errors
+      const vehicleMatch = error.match(/Vehicle (\d+): (.+)/);
+      if (vehicleMatch) {
+        const vehicleIndex = parseInt(vehicleMatch[1], 10) - 1;
+        const vehicleError = vehicleMatch[2];
+        if (vehicleErrors[vehicleIndex]) {
+          vehicleErrors[vehicleIndex] = [
+            ...vehicleErrors[vehicleIndex],
+            vehicleError,
+          ];
+        } else {
+          vehicleErrors[vehicleIndex] = [vehicleError];
+        }
+      }
     });
 
-    setErrors(errorMap);
+    setErrors({ ...errorMap, vehicleErrors: vehicleErrors });
 
-    // If there are any errors, prevent submission
-    if (Object.keys(errorMap).length > 0) return;
+    if (
+      Object.keys(errorMap).length > 0 ||
+      vehicleErrors.some((v) => v.length > 0)
+    )
+      return;
 
     console.log("Submitting application:", applicationData);
   };
@@ -108,7 +123,11 @@ const ApplicationForm = () => {
         setPrimaryApplicant={setPrimaryApplicant}
         errors={errors}
       />
-      <Vehicles vehicles={vehicles} setVehicles={setVehicles} errors={errors} />
+      <Vehicles
+        vehicles={vehicles}
+        setVehicles={setVehicles}
+        errors={Array.isArray(errors.vehicleErrors) ? errors.vehicleErrors : []}
+      />
       <AdditionalApplicants
         additionalApplicants={additionalApplicants}
         setAdditionalApplicants={setAdditionalApplicants}
