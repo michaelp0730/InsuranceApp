@@ -173,6 +173,36 @@ const ApplicationForm = () => {
     setIsNewApplicationSubmitted(true);
   };
 
+  const handleSaveWrapper = (e: React.MouseEvent<HTMLButtonElement>) => {
+    handleSave(
+      e,
+      {
+        applicationId,
+        firstName: primaryApplicant.firstName,
+        lastName: primaryApplicant.lastName,
+        dateOfBirth: new Date(
+          `${primaryApplicant.dateOfBirth.year}-${primaryApplicant.dateOfBirth.month}-${primaryApplicant.dateOfBirth.date}`
+        ),
+        addressStreet: primaryApplicant.addressStreet,
+        addressCity: primaryApplicant.addressCity,
+        addressState: primaryApplicant.addressState,
+        addressZipCode: Number(primaryApplicant.addressZipCode),
+        vehicles,
+        people: additionalApplicants,
+      },
+      isExistingApplication,
+      applicationId,
+      currentUrl,
+      currentPort,
+      setErrors,
+      setAlertMessage,
+      setAlertType,
+      clearAlerts
+    );
+
+    setIsNewApplicationSubmitted(true);
+  };
+
   return (
     <>
       {alertMessage && (
@@ -201,35 +231,7 @@ const ApplicationForm = () => {
           setErrors={setErrors}
           clearAlerts={clearAlerts}
         />
-        <SaveSubmitButtons
-          onSave={(e) =>
-            handleSave(
-              e,
-              {
-                applicationId,
-                firstName: primaryApplicant.firstName,
-                lastName: primaryApplicant.lastName,
-                dateOfBirth: new Date(
-                  `${primaryApplicant.dateOfBirth.year}-${primaryApplicant.dateOfBirth.month}-${primaryApplicant.dateOfBirth.date}`
-                ),
-                addressStreet: primaryApplicant.addressStreet,
-                addressCity: primaryApplicant.addressCity,
-                addressState: primaryApplicant.addressState,
-                addressZipCode: Number(primaryApplicant.addressZipCode),
-                vehicles,
-                people: additionalApplicants,
-              },
-              isExistingApplication,
-              applicationId,
-              currentUrl,
-              currentPort,
-              setErrors,
-              setAlertMessage,
-              setAlertType,
-              clearAlerts
-            )
-          }
-        />
+        <SaveSubmitButtons onSave={handleSaveWrapper} />
       </form>
     </>
   );

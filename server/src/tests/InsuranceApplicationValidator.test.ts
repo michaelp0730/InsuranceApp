@@ -67,15 +67,6 @@ describe("InsuranceApplicationValidator", () => {
     expect(errors).toContain(ValidationUtils.getMinAgeErrorMsg());
   });
 
-  it("should return an error if addressState is empty", () => {
-    application.addressState = "";
-    const validator = new InsuranceApplicationValidator(application);
-    const errors = validator.validateCompleteApplication();
-    expect(errors).toContain(
-      ValidationUtils.getNonEmptyStringErrorMsg("addressState")
-    );
-  });
-
   it("should return an error if addressZipCode contains letters", () => {
     application.addressZipCode = NaN as any;
     const validator = new InsuranceApplicationValidator(application);

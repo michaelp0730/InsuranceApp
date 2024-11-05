@@ -1,4 +1,4 @@
-import { Dispatch, MouseEvent, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import InsuranceApplication from "../interfaces/InsuranceApplication";
 import InsuranceApplicationSaveValidator from "../validators/InsuranceApplicationSaveValidator";
 import {
@@ -8,7 +8,7 @@ import {
 } from "../utils/ApplicationUtils";
 
 const handleSave = async (
-  e: MouseEvent<HTMLButtonElement>,
+  e: React.MouseEvent<HTMLButtonElement>,
   applicationData: InsuranceApplication,
   isExistingApplication: boolean,
   applicationId: string,
@@ -28,18 +28,17 @@ const handleSave = async (
   e.preventDefault();
   clearAlerts();
 
-  // Validate the application data
-  const saveValidator = new InsuranceApplicationSaveValidator(applicationData);
-  const validationErrors = saveValidator.validate();
-
   const genericErrors: { [key: string]: string } = {};
   const vehicleErrors: string[][] = Array.from(
     { length: applicationData.vehicles.length },
     () => []
   );
   const applicantErrors: { [key: string]: string }[] = Array(
-    applicationData.people?.length
+    applicationData.people?.length || 0
   ).fill({});
+
+  const saveValidator = new InsuranceApplicationSaveValidator(applicationData);
+  const validationErrors = saveValidator.validate();
 
   // Map validation errors to the correct fields
   validationErrors.forEach((error) => {
@@ -128,6 +127,10 @@ const handleSave = async (
   const updatedApplicationData = {
     ...applicationData,
     dateOfBirth: dateOfBirthString,
+    addressStreet: applicationData.addressStreet || null,
+    addressCity: applicationData.addressCity || null,
+    addressState: applicationData.addressState || null,
+    addressZipCode: applicationData.addressZipCode || null,
     people: formattedPeople,
   };
 

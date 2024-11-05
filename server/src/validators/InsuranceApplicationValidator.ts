@@ -24,11 +24,8 @@ class InsuranceApplicationValidator {
     }
 
     // Validate applicant fields
-    if (!this.application.firstName)
-      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("firstName"));
-
-    if (!this.application.lastName)
-      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("lastName"));
+    this.validateNonEmptyString("firstName", this.application.firstName);
+    this.validateNonEmptyString("lastName", this.application.lastName);
 
     if (!this.application.dateOfBirth) {
       this.errors.push(
@@ -41,34 +38,17 @@ class InsuranceApplicationValidator {
     }
 
     // Validate address fields
-    if (
-      !this.application.addressStreet ||
-      this.application.addressStreet.trim() === ""
-    ) {
-      this.errors.push(
-        ValidationUtils.getNonEmptyStringErrorMsg("addressStreet")
-      );
-    }
+    this.validateNonEmptyString(
+      "addressStreet",
+      this.application.addressStreet
+    );
+    this.validateNonEmptyString("addressCity", this.application.addressCity);
+    this.validateNonEmptyString("addressState", this.application.addressState);
 
     if (
-      !this.application.addressCity ||
-      this.application.addressCity.trim() === ""
+      this.application.addressZipCode !== undefined &&
+      !/^\d+$/.test(this.application.addressZipCode.toString())
     ) {
-      this.errors.push(
-        ValidationUtils.getNonEmptyStringErrorMsg("addressCity")
-      );
-    }
-
-    if (
-      !this.application.addressState ||
-      this.application.addressState.trim() === ""
-    ) {
-      this.errors.push(
-        ValidationUtils.getNonEmptyStringErrorMsg("addressState")
-      );
-    }
-
-    if (!/^\d+$/.test(this.application?.addressZipCode?.toString() ?? "")) {
       this.errors.push("addressZipCode must contain only numbers.");
     }
 
@@ -84,18 +64,14 @@ class InsuranceApplicationValidator {
   }
 
   validatePartialApplication(): string[] {
-    if (
-      this.application.firstName !== undefined &&
-      !this.application.firstName.trim()
-    ) {
+    if (this.isEmptyOrWhitespace(this.application.firstName)) {
       this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("firstName"));
     }
-    if (
-      this.application.lastName !== undefined &&
-      !this.application.lastName.trim()
-    ) {
+
+    if (this.isEmptyOrWhitespace(this.application.lastName)) {
       this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg("lastName"));
     }
+
     if (this.application.dateOfBirth !== undefined) {
       if (
         !(this.application.dateOfBirth instanceof Date) ||
@@ -104,21 +80,7 @@ class InsuranceApplicationValidator {
         this.errors.push("dateOfBirth must be a valid date.");
       }
     }
-    if (
-      this.application.addressState !== undefined &&
-      !this.application.addressState.trim()
-    ) {
-      this.errors.push(
-        ValidationUtils.getNonEmptyStringErrorMsg("addressState")
-      );
-    }
-    if (
-      this.application.addressZipCode !== undefined &&
-      (!Number.isInteger(this.application.addressZipCode) ||
-        this.application.addressZipCode <= 0)
-    ) {
-      this.errors.push("addressZipCode must be a positive integer.");
-    }
+
     return this.errors;
   }
 
@@ -153,6 +115,16 @@ class InsuranceApplicationValidator {
         this.errors.push(`Person ${index + 1}: ${error}`);
       });
     });
+  }
+
+  private validateNonEmptyString(field: string, value?: string | null): void {
+    if (this.isEmptyOrWhitespace(value)) {
+      this.errors.push(ValidationUtils.getNonEmptyStringErrorMsg(field));
+    }
+  }
+
+  private isEmptyOrWhitespace(value?: string | null): boolean {
+    return value === null || value === undefined || value.trim() === "";
   }
 }
 

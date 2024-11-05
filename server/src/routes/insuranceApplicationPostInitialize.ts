@@ -40,6 +40,7 @@ router.post("/", async (req: Request, res: Response) => {
 
   const validator = new InsuranceApplicationValidator(partialApplication);
   const validationErrors = validator.validatePartialApplication();
+  console.log(validationErrors);
 
   // Validate vehicles if provided
   if (partialApplication.vehicles && partialApplication.vehicles.length > 0) {
@@ -107,7 +108,9 @@ router.post("/", async (req: Request, res: Response) => {
       values.push(partialApplication.addressZipCode);
       placeholders.push("?");
     }
+    console.log("Received application data:", partialApplication);
     console.log(`fields: ${fields}`);
+    console.log("Values to insert:", values);
 
     if (fields.length === 1) {
       // Only applicationId is present, which means no other fields to insert

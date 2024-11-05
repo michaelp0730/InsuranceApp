@@ -8,6 +8,9 @@ function App() {
         Please submit the form below to receive an auto insurance quote. You may
         save the form and submit it later if needed.
       </p>
+      <p>
+        <a href="http://localhost:5173">Start New Application</a>
+      </p>
       <div className="mt-5">
         <ApplicationForm />
       </div>
