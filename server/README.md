@@ -22,11 +22,15 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
   - [Environment Variables](#environment-variables)
 - [Node Server](#node-server)
   - [Clone the Repository](#clone-the-repository)
-  - [Install Dependencies](#install-dependencies)
+  - [Install Server Dependencies](#install-server-dependencies)
   - [Starting the Server](#starting-the-server)
   - [Running Tests](#running-tests)
     - [Run All Tests](#run-all-tests)
-  - [Project Structure](#project-structure)
+- [React Client](#react-client)
+  - [Install Client Dependencies](#install-client-dependencies)
+  - [Running the Client Project](#running-the-client-project)
+  - [Building the Client Project](#building-the-client-project)
+- [Project Structure](#project-structure)
 
 ## Prerequisites
 
@@ -193,12 +197,12 @@ DB_NAME=InsuranceApp       # The name of your MySQL database
 
 ```
 git clone https://github.com/michaelp0730/InsuranceApp
-cd InsuranceApp
+cd InsuranceApp/server/
 ```
 
-### Install Dependencies
+### Install Server Dependencies
 
-Run the following command in the project root to install all required packages:
+Run the following command in the `server` directory to install all required packages:
 
 ```
 npm install
@@ -239,8 +243,36 @@ npm test
 
 - This will execute all the Jest tests in the project and output the results to the console.
 
+## React Client
+
+### Install Client Dependencies
+
+Run the following command from the root of the `client` directory to install all required packages:
+
+```
+npm install
+```
+
+This command will read the `package.json` file and install all the dependencies listed under `dependencies` and `devDependencies`.
+
+### Running the Client Project
+
+Run the following command from the root of the `client` directory, then visit the listed URL in your browser.
+
+```
+npm run dev
+```
+
+### Building the Client Project
+
+```
+npm run build
+```
+
 ### Project Structure
 
-- src/: Contains the main application code, including interfaces, validators, routes, and utility functions.
-- dist/: The compiled JavaScript output (generated after running `npm run build`).
-- tests/: Contains unit tests for the project using Jest.
+- client
+  - src/: Contains the main client application code, including components, interfaces, and utility functions.
+- server
+  - src/: Contains the main server application code, including interfaces, validators, routes, utility functions, and unit tests.
+  - dist/: The compiled JavaScript output (generated after running `npm run build`).

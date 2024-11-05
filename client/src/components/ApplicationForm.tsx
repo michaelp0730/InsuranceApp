@@ -6,6 +6,7 @@ import {
 import PrimaryApplicant from "./PrimaryApplicant";
 import Vehicle from "../interfaces/Vehicle";
 import Vehicles from "./Vehicles";
+import Person from "../interfaces/Person";
 import AdditionalApplicants from "./AdditionalApplicants";
 import SaveSubmitButtons from "./SaveSubmitButtons";
 
@@ -21,7 +22,7 @@ const ApplicationForm = () => {
   const [primaryApplicant, setPrimaryApplicant] = useState({
     firstName: "",
     lastName: "",
-    dateOfBirth: "",
+    dateOfBirth: { month: "January", date: "1", year: "2024" },
     addressStreet: "",
     addressCity: "",
     addressState: "",
@@ -29,9 +30,11 @@ const ApplicationForm = () => {
   });
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [additionalApplicants, setAdditionalApplicants] = useState([]);
+  const [additionalApplicants, setAdditionalApplicants] = useState<Person[]>(
+    []
+  );
 
-  const handleSave = (e) => {
+  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     const applicationData = {
@@ -44,7 +47,7 @@ const ApplicationForm = () => {
     console.log("Saving application:", applicationData);
   };
 
-  const handleSubmit = (e: Event) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const applicationData = {
@@ -58,7 +61,7 @@ const ApplicationForm = () => {
   };
 
   return (
-    <form className="card p-5" onSubmit={(e) => handleSubmit(e)}>
+    <form className="card p-5" onSubmit={handleSubmit}>
       <PrimaryApplicant
         primaryApplicant={primaryApplicant}
         setPrimaryApplicant={setPrimaryApplicant}
@@ -68,7 +71,7 @@ const ApplicationForm = () => {
         additionalApplicants={additionalApplicants}
         setAdditionalApplicants={setAdditionalApplicants}
       />
-      <SaveSubmitButtons onSave={handleSave} onSubmit={handleSubmit} />
+      <SaveSubmitButtons onSave={handleSave} />
     </form>
   );
 };

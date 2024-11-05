@@ -1,7 +1,13 @@
-const SaveSubmitButtons = ({ onSave, onSubmit }) => {
+import React from "react";
+
+interface SaveSubmitButtonsProps {
+  onSave: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+const SaveSubmitButtons: React.FC<SaveSubmitButtonsProps> = ({ onSave }) => {
   return (
     <fieldset className="mt-5">
-      <button type="submit" className="btn btn-success" onClick={onSubmit}>
+      <button type="submit" className="btn btn-success">
         Submit
       </button>
       &nbsp;
