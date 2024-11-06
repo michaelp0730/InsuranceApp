@@ -39,7 +39,6 @@ router.post("/", async (req: Request, res: Response) => {
 
   try {
     await connection.beginTransaction();
-    console.log(`Application: ${JSON.stringify(insuranceApplication)}`);
 
     const {
       applicationId,

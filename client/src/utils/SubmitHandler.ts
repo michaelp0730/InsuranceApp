@@ -111,8 +111,6 @@ const handleSubmit = async (
   const primaryApplicantDobString = formatDateForDatabase(
     applicationData.dateOfBirth
   );
-  console.log(`applicationData.dateOfBirth: ${applicationData.dateOfBirth}`);
-  console.log(`primaryApplicantDobString: ${primaryApplicantDobString}`);
 
   // Format the additional applicants' date of birth as strings, ensuring valid dates
   const formattedPeople =
@@ -160,8 +158,6 @@ const handleSubmit = async (
       setAlertMessage(responseData.message);
       setAlertType("alert-success");
     }
-
-    console.log("Application saved successfully:", updatedApplicationData);
   } catch (error) {
     console.error("Error saving application:", error);
     setAlertType("alert-danger");

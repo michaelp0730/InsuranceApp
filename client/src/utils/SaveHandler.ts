@@ -184,8 +184,6 @@ const handleSave = async (
   const queryParams = { applicationId };
   const updatedUrl = addQueryStringToUrl(currentUrl, queryParams);
   updateUrl(updatedUrl);
-
-  console.log("Saving application:", updatedApplicationData);
 };
 
 export default handleSave;
