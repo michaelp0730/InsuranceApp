@@ -6,10 +6,6 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
 
 - [Prerequisites](#prerequisites)
 - [MySQL](#mysql-database)
-  - [Installation Instructions for MySQL](#installation-instructions-for-mysql)
-    - [Mac](#mac)
-    - [Windows](#windows)
-    - [Linux](#linux)
   - [Setting Up the Database](#setting-up-the-database)
     - [Step 1: Log in to MySQL](#step-1-log-in-to-mysql)
     - [Step 2: Create the Database](#step-2-create-the-database)
@@ -26,12 +22,11 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
   - [CORS Configuration](#cors-configuration)
   - [Starting the Server](#starting-the-server)
   - [Running Tests](#running-tests)
-    - [Run All Tests](#run-all-tests)
 - [React Client](#react-client)
   - [Install Client Dependencies](#install-client-dependencies)
   - [Running the Client Project](#running-the-client-project)
   - [Building the Client Project](#building-the-client-project)
-  - [Saving an Application](#saving-an-application)
+  - [Saving an Application Form](#saving-an-application)
 - [Project Structure](#project-structure)
 
 ## Prerequisites
@@ -41,61 +36,9 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
 
 ## MySQL Database
 
-### Installation Instructions
-
-#### Mac
-
-##### Using Homebrew:
-
-```
-brew install mysql
-```
-
-##### Start MySQL
-
-```
-brew services start mysql
-```
-
-##### Secure MySQL Installation
-
-```
-mysql_secure_installation
-```
-
-#### Windows
-
-1. Download the MySQL installer from the [official MySQL website](https://dev.mysql.com/downloads/installer/).
-1. Run the installer and follow the setup wizard.
-1. Choose the "Developer Default" setup type.
-1. Complete the installation and make note of the root password you set.
-1. Start MySQL
-   - Open MySQL from the Start Menu or use the `mysql` command in your terminal.
-
-#### Linux
-
-##### Using APT (Ubuntu/Debian):
-
-```
-sudo apt update
-sudo apt install mysql-server
-```
-
-##### Secure MySQL Installation
-
-```
-sudo mysql_secure_installation
-```
-
-##### Start MySQL
-
-```
-sudo systemctl start mysql
-```
-
 ### Setting Up the Database
 
-Once MySQL is installed and running, follow these steps to create the `InsuranceApp` database and the `applications` table.
+Once MySQL is installed and running, follow these steps to create the `InsuranceApp` database and the necessary tables.
 
 #### Step 1: Log in to MySQL
 
@@ -204,13 +147,7 @@ cd InsuranceApp/server/
 
 ### Install Server Dependencies
 
-Run the following command in the `server` directory to install all required packages:
-
-```
-npm install
-```
-
-This command will read the `package.json` file and install all the dependencies listed under `dependencies` and `devDependencies`.
+Run `npm install` in the command line from the `server` directory to install all required packages.
 
 ### CORS Configuration
 
@@ -250,8 +187,6 @@ node dist/server.js
 
 The project uses Jest for unit testing. Here's how to run the tests:
 
-#### Run All Tests
-
 ```
 npm test
 ```
@@ -262,13 +197,7 @@ npm test
 
 ### Install Client Dependencies
 
-Run the following command from the root of the `client` directory to install all required packages:
-
-```
-npm install
-```
-
-This command will read the `package.json` file and install all the dependencies listed under `dependencies` and `devDependencies`.
+Run `npm install` in the command line from the root of the `client` directory to install all required packages.
 
 ### Running the Client Project
 
@@ -284,11 +213,11 @@ npm run dev
 npm run build
 ```
 
-### Saving an Application
+### Saving an Application Form
 
-The minimum amount of information required to save an application is the first name, last name, and date of birth for the primary applicant. If a vehicle is added to the application, all three fields (VIN, Year, and Make/Model) are required before saving.
+The minimum amount of information required to save an application is the first name, last name, and date of birth for the primary applicant. If you try to save an application form without those minimum fields being entered, you will receive an error message.
 
-### Project Structure
+## Project Structure
 
 - client
   - src/: Contains the main client application code, including components, interfaces, and utility functions.

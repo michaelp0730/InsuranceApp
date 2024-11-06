@@ -13,7 +13,12 @@ router.put(
     const { applicationId } = req.params;
     const partialApplication = req.body as Partial<InsuranceApplication>;
 
-    // Create a validator instance and collect errors
+    if (partialApplication.dateOfBirth) {
+      const date = new Date(partialApplication.dateOfBirth);
+      date.setUTCHours(12, 0, 0, 0);
+      partialApplication.dateOfBirth = date;
+    }
+
     const validator = new InsuranceApplicationValidator(partialApplication);
     const validationErrors = validator.validatePartialApplication();
 
@@ -28,15 +33,15 @@ router.put(
       });
     }
 
-    // Validate people if provided and cast dateOfBirth from string to Date
     if (partialApplication.people && partialApplication.people.length > 0) {
       partialApplication.people = partialApplication.people.map(
         (person, index) => {
-          // Parse the dateOfBirth to a Date object
-          const parsedDateOfBirth = new Date(person.dateOfBirth);
-          person.dateOfBirth = parsedDateOfBirth;
+          if (person.dateOfBirth) {
+            const parsedDateOfBirth = new Date(person.dateOfBirth);
+            parsedDateOfBirth.setUTCHours(12, 0, 0, 0);
+            person.dateOfBirth = parsedDateOfBirth;
+          }
 
-          // Perform validation
           const personValidator = new PersonValidator(person);
           const personErrors = personValidator.validate();
 
@@ -49,7 +54,6 @@ router.put(
       );
     }
 
-    // If there are validation errors, return them
     if (validationErrors.length > 0) {
       res.status(400).json({ errors: validationErrors });
       return;
@@ -60,7 +64,6 @@ router.put(
     try {
       await connection.beginTransaction();
 
-      // Update the application fields if provided
       const fieldsToUpdate: string[] = [];
       const values: any[] = [];
 
@@ -109,27 +112,47 @@ router.put(
         await connection.execute(updateSql, values);
       }
 
-      // Check existing vehicle count for the application
-      const checkVehicleCountSql = `SELECT COUNT(*) as vehicleCount FROM vehicles WHERE applicationId = ?`;
-      const [vehicleCountResult] = await connection.execute(
-        checkVehicleCountSql,
-        [applicationId]
-      );
-      const vehicleCount = (vehicleCountResult as any)[0].vehicleCount;
+      const updatePrimaryPersonSql = `
+        INSERT INTO people (applicationId, firstName, lastName, dateOfBirth, relationship)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE firstName = ?, lastName = ?, dateOfBirth = ?
+      `;
+      await connection.execute(updatePrimaryPersonSql, [
+        applicationId,
+        partialApplication.firstName,
+        partialApplication.lastName,
+        partialApplication.dateOfBirth,
+        "Primary Applicant",
+        partialApplication.firstName,
+        partialApplication.lastName,
+        partialApplication.dateOfBirth,
+      ]);
 
-      // Validate that adding new vehicles will not exceed 3
-      const totalVehicleCount =
-        vehicleCount +
-        (partialApplication.vehicles ? partialApplication.vehicles.length : 0);
-      if (totalVehicleCount > 3) {
-        res
-          .status(400)
-          .json({ error: "A policy cannot have more than 3 vehicles." });
-        await connection.rollback();
-        return;
+      // Delete existing additional people records to replace with the updated data
+      const deleteAdditionalPeopleSql = `DELETE FROM people WHERE applicationId = ? AND relationship != 'Primary Applicant'`;
+      await connection.execute(deleteAdditionalPeopleSql, [applicationId]);
+
+      // Re-insert all additional people records
+      if (partialApplication.people && partialApplication.people.length > 0) {
+        const insertPersonSql = `
+          INSERT INTO people (applicationId, firstName, lastName, dateOfBirth, relationship)
+          VALUES (?, ?, ?, ?, ?)
+        `;
+        for (const person of partialApplication.people) {
+          await connection.execute(insertPersonSql, [
+            applicationId,
+            person.firstName,
+            person.lastName,
+            person.dateOfBirth,
+            person.relationship || null,
+          ]);
+        }
       }
 
-      // Insert new vehicles if provided
+      // Delete existing vehicles and re-insert if provided
+      const deleteVehiclesSql = `DELETE FROM vehicles WHERE applicationId = ?`;
+      await connection.execute(deleteVehiclesSql, [applicationId]);
+
       if (
         partialApplication.vehicles &&
         partialApplication.vehicles.length > 0
@@ -144,23 +167,6 @@ router.put(
             vehicle.vin,
             vehicle.year,
             vehicle.makeModel,
-          ]);
-        }
-      }
-
-      // Insert new people if provided
-      if (partialApplication.people && partialApplication.people.length > 0) {
-        const insertPersonSql = `
-          INSERT INTO people (applicationId, firstName, lastName, dateOfBirth, relationship)
-          VALUES (?, ?, ?, ?, ?)
-        `;
-        for (const person of partialApplication.people) {
-          await connection.execute(insertPersonSql, [
-            applicationId,
-            person.firstName,
-            person.lastName,
-            person.dateOfBirth,
-            person.relationship || null,
           ]);
         }
       }

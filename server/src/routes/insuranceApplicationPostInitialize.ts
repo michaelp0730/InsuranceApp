@@ -14,27 +14,20 @@ router.post("/", async (req: Request, res: Response) => {
     return;
   }
 
-  // Parse dateOfBirth for the primary applicant if provided
   if (partialApplication.dateOfBirth) {
-    const parsedDate = new Date(partialApplication.dateOfBirth);
-    if (isNaN(parsedDate.getTime())) {
-      res.status(400).json({ errors: ["dateOfBirth must be a valid date."] });
-      return;
-    }
-    partialApplication.dateOfBirth = parsedDate;
+    const date = new Date(partialApplication.dateOfBirth);
+    date.setUTCHours(12, 0, 0, 0);
+    partialApplication.dateOfBirth = date;
   }
 
-  // Parse dateOfBirth fields for the people array
   if (partialApplication.people) {
     partialApplication.people = partialApplication.people.map((person) => {
-      const parsedDate = new Date(person.dateOfBirth);
-      if (isNaN(parsedDate.getTime())) {
-        res.status(400).json({
-          errors: [`Person ${person.firstName} has an invalid dateOfBirth.`],
-        });
-        return person;
+      if (person.dateOfBirth) {
+        const date = new Date(person.dateOfBirth);
+        date.setUTCHours(12, 0, 0, 0);
+        return { ...person, dateOfBirth: date };
       }
-      return { ...person, dateOfBirth: parsedDate };
+      return { ...person };
     });
   }
 

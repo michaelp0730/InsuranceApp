@@ -10,12 +10,21 @@ const getRandomNumber = (min: number, max: number): number =>
 router.post("/", async (req: Request, res: Response) => {
   const insuranceApplication = req.body as InsuranceApplication;
 
-  // Parse dateOfBirth fields for the people array
+  if (insuranceApplication.dateOfBirth) {
+    const date = new Date(insuranceApplication.dateOfBirth);
+    date.setUTCHours(12, 0, 0, 0);
+    insuranceApplication.dateOfBirth = date;
+  }
+
   if (insuranceApplication.people) {
-    insuranceApplication.people = insuranceApplication.people.map((person) => ({
-      ...person,
-      dateOfBirth: new Date(person.dateOfBirth),
-    }));
+    insuranceApplication.people = insuranceApplication.people.map((person) => {
+      if (person.dateOfBirth) {
+        const date = new Date(person.dateOfBirth);
+        date.setUTCHours(12, 0, 0, 0);
+        return { ...person, dateOfBirth: date };
+      }
+      return { ...person };
+    });
   }
 
   const validator = new InsuranceApplicationValidator(insuranceApplication);
@@ -45,7 +54,6 @@ router.post("/", async (req: Request, res: Response) => {
       vehicles,
     } = insuranceApplication;
 
-    // Check if the application already exists
     const checkSql = `SELECT id FROM applications WHERE applicationId = ?`;
     const [existingApplication] = await connection.execute(checkSql, [
       applicationId,
@@ -133,7 +141,6 @@ router.post("/", async (req: Request, res: Response) => {
       }
     }
 
-    // Insert vehicles
     const vehicleSql = `
       INSERT INTO vehicles (
         applicationId, vin, year, makeModel

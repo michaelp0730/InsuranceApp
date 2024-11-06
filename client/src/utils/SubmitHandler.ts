@@ -111,6 +111,8 @@ const handleSubmit = async (
   const primaryApplicantDobString = formatDateForDatabase(
     applicationData.dateOfBirth
   );
+  console.log(`applicationData.dateOfBirth: ${applicationData.dateOfBirth}`);
+  console.log(`primaryApplicantDobString: ${primaryApplicantDobString}`);
 
   // Format the additional applicants' date of birth as strings, ensuring valid dates
   const formattedPeople =
@@ -121,7 +123,6 @@ const handleSubmit = async (
 
       return {
         ...person,
-        // Check if the constructed date is valid
         dateOfBirth: !isNaN(dob.getTime()) ? formatDateForDatabase(dob) : null,
       };
     }) || [];

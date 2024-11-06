@@ -127,17 +127,25 @@ const handleSave = async (
   const updatedApplicationData = {
     ...applicationData,
     dateOfBirth: dateOfBirthString,
-    addressStreet: applicationData.addressStreet || null,
-    addressCity: applicationData.addressCity || null,
-    addressState: applicationData.addressState || null,
-    addressZipCode: applicationData.addressZipCode || null,
     people: formattedPeople,
   };
 
   try {
     let response;
 
-    if (!isExistingApplication) {
+    if (isExistingApplication) {
+      // If it's an existing application, use the PUT route
+      response = await fetch(
+        `http://localhost:5150/api/update-application/${applicationId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedApplicationData),
+        }
+      );
+    } else {
       // If it's a new application, post to the initialize route
       response = await fetch(
         "http://localhost:5150/api/post-initialize-application",
@@ -160,13 +168,13 @@ const handleSave = async (
     } else {
       setAlertType("alert-success");
       setAlertMessage(
-        `Thank you for saving your auto insurance application. ` +
+        `Your application has been successfully saved. ` +
           `Please revisit this application at http://localhost:${currentPort}/?applicationId=${applicationId}, ` +
           `or keep this page open, to complete your application.`
       );
     }
   } catch (error) {
-    console.error("Error saving insurance application:", JSON.stringify(error));
+    console.error("Error saving insurance application:", error);
     setAlertType("alert-danger");
     setAlertMessage(
       "There was an error saving your application. Please try again."
