@@ -1,6 +1,6 @@
 # InsuranceApp
 
-This is a Node.js project that includes a RESTful API to manage insurance applications. The API will use a MySQL database to store data related to insurance applications. This guide will help you set up the InsuranceApp Node.js project, install dependencies, start the server, and run tests.
+This is a Node.js project that includes a RESTful API to manage insurance applications. The API uses a MySQL database to store data related to insurance applications. This guide will help you set up the InsuranceApp database, Node.js sever, and React client.
 
 ## Table of Contents
 
@@ -15,10 +15,10 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
     - [Mac](#mac-1)
     - [Windows](#windows-1)
     - [Linux](#linux-1)
-  - [Environment Variables](#environment-variables)
 - [Node Server](#node-server)
   - [Clone the Repository](#clone-the-repository)
   - [Install Server Dependencies](#install-server-dependencies)
+  - [Environment Variables](#environment-variables)
   - [CORS Configuration](#cors-configuration)
   - [Starting the Server](#starting-the-server)
   - [Running Tests](#running-tests)
@@ -32,6 +32,7 @@ This is a Node.js project that includes a RESTful API to manage insurance applic
 ## Prerequisites
 
 - Node.js (v18 or above recommended)
+- NPM
 - MySQL installed on your system
 
 ## MySQL Database
@@ -65,7 +66,6 @@ USE InsuranceApp
 #### Step 4: Create the Database Tables
 
 ```sql
--- Applications table
 CREATE TABLE applications (
   id INT AUTO_INCREMENT PRIMARY KEY,
   applicationId VARCHAR(36) NOT NULL UNIQUE,
@@ -79,7 +79,6 @@ CREATE TABLE applications (
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- People table
 CREATE TABLE people (
   id INT AUTO_INCREMENT PRIMARY KEY,
   applicationId VARCHAR(36) NOT NULL,
@@ -91,7 +90,6 @@ CREATE TABLE people (
   FOREIGN KEY (applicationId) REFERENCES applications(applicationId) ON DELETE CASCADE
 );
 
--- Vehicles table
 CREATE TABLE vehicles (
   id INT AUTO_INCREMENT PRIMARY KEY,
   applicationId VARCHAR(36) NOT NULL,
@@ -125,17 +123,6 @@ net start MySQL
 sudo systemctl start mysql
 ```
 
-### Environment Variables
-
-To configure your database connection securely, you need to create a `.env` file in the root of the project.
-
-```
-DB_HOST=localhost          # The hostname of your database server
-DB_USER=root               # Your MySQL username
-DB_PASSWORD=yourpassword   # Your MySQL password
-DB_NAME=InsuranceApp       # The name of your MySQL database
-```
-
 ## Node Server
 
 ### Clone the Repository
@@ -148,6 +135,17 @@ cd InsuranceApp/server/
 ### Install Server Dependencies
 
 Run `npm install` in the command line from the `server` directory to install all required packages.
+
+### Environment Variables
+
+To configure your database connection securely, you need to create a `.env` file in the root of the `sever` directory.
+
+```
+DB_HOST=localhost          # The hostname of your database server
+DB_USER=root               # Your MySQL username
+DB_PASSWORD=yourpassword   # Your MySQL password
+DB_NAME=InsuranceApp       # The name of your MySQL database
+```
 
 ### CORS Configuration
 
