@@ -97,13 +97,15 @@ const Vehicles: React.FC<VehiclesProps> = ({
           </div>
         ))}
       </div>
-      <button
-        type="button"
-        className="btn btn-outline-primary mt-3"
-        onClick={addVehicle}
-      >
-        Add Vehicle
-      </button>
+      {vehicles && vehicles.length < 3 && (
+        <button
+          type="button"
+          className="btn btn-outline-primary mt-3"
+          onClick={addVehicle}
+        >
+          Add Vehicle
+        </button>
+      )}
     </fieldset>
   );
 };
